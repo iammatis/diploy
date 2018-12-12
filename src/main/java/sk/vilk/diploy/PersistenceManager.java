@@ -5,7 +5,9 @@ import sk.vilk.diploy.model.MetaObject;
 
 import javax.persistence.Id;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PersistenceManager {
@@ -55,6 +57,50 @@ public class PersistenceManager {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private List<byte[]> readInBulk(Object object) {
+        String fileName = createFileNameFromObject(object, false);
+        List<byte[]> byteList = new ArrayList<>();
+
+        try (FileInputStream fis = new FileInputStream(fileName)) {
+            //TODO: cachedObjects might be empty => Remove everything in main file
+            for(Map.Entry<Object, MetaObject> entry : getCachedMetaObjects().entrySet()) {
+                Object objectId = entry.getKey();
+                MetaObject metaObject = entry.getValue();
+
+                byte[] bytes = new byte[metaObject.getLength()];
+
+                fis.getChannel().position(metaObject.getFrom());
+                fis.read(bytes);
+
+                byteList.add(bytes);
+            }
+
+            return byteList;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private boolean saveInBulk(Object object, List<byte[]> byteList) {
+        String fileName = createFileNameFromObject(object, false);
+
+        try (FileOutputStream fos = new FileOutputStream(fileName)) {
+            for (byte[] bytes: byteList) {
+                fos.write(bytes);
+            }
+            return true;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     public boolean remove(Object object) {
@@ -111,6 +157,16 @@ public class PersistenceManager {
         }
 
         return false;
+    }
+
+    public boolean performVacuum(Object object) {
+        List<byte[]> byteList = readInBulk(object);
+
+        if (byteList == null || byteList.isEmpty()) {
+            return false;
+        }
+
+        return saveInBulk(object, byteList);
     }
 
     private MetaObject createMetaObject(Object object, File file, byte[] bytes) {
