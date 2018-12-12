@@ -4,24 +4,14 @@ import java.io.Serializable;
 
 public class MetaObject implements Serializable {
 
-    private Object object;
     private Object id;
     private long from;
     private int length;
 
-    public MetaObject(Object object, Object id, long from, int length) {
-        this.object = object;
+    public MetaObject(Object id, long from, int length) {
         this.id = id;
         this.from = from;
         this.length = length;
-    }
-
-    public Object getObject() {
-        return object;
-    }
-
-    public void setObject(Object object) {
-        this.object = object;
     }
 
     public Object getId() {
@@ -51,7 +41,6 @@ public class MetaObject implements Serializable {
     @Override
     public String toString() {
         return "MetaObject{" +
-                "object=" + object +
                 ", id=" + id +
                 ", from=" + from +
                 ", length=" + length +

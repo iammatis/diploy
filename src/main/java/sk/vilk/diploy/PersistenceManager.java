@@ -28,7 +28,7 @@ public class PersistenceManager {
             fos.write(bytes);
 
             MetaObject metaObject = createMetaObject(object, file, bytes);
-            saveMeta(metaObject, true);
+            saveMeta(object, metaObject, true);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -65,7 +65,7 @@ public class PersistenceManager {
         if (metaObject == null) return false;
 
         cachedMetaObjects.remove(metaObject.getId());
-        saveMeta(metaObject, false);
+        saveMeta(object, metaObject, false);
 
         return true;
     }
@@ -78,8 +78,8 @@ public class PersistenceManager {
         return true;
     }
 
-    private boolean saveMeta(MetaObject metaObject, boolean append) {
-        String fileName = createFileNameFromObject(metaObject.getObject(), true);
+    private boolean saveMeta(Object object, MetaObject metaObject, boolean append) {
+        String fileName = createFileNameFromObject(object, true);
 
         File file = new File(fileName);
         try (FileOutputStream fos = new FileOutputStream(file); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
@@ -115,7 +115,7 @@ public class PersistenceManager {
 
     private MetaObject createMetaObject(Object object, File file, byte[] bytes) {
         Object objectId = annotationManager.getAttributeValue(object, Id.class);
-        return new MetaObject(object, objectId,file.length() - bytes.length, bytes.length);
+        return new MetaObject(objectId,file.length() - bytes.length, bytes.length);
     }
 
     private byte[] serializeObject(Object object) {
