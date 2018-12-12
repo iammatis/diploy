@@ -48,4 +48,13 @@ public class MetaObject implements Serializable {
         this.length = length;
     }
 
+    @Override
+    public String toString() {
+        return "MetaObject{" +
+                "object=" + object +
+                ", id=" + id +
+                ", from=" + from +
+                ", length=" + length +
+                '}';
+    }
 }

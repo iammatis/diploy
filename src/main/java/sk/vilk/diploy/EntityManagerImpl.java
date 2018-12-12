@@ -25,12 +25,13 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     public <T> T merge(T t) {
-        //TODO: Implement merge
-        return null;
+        if (t == null) return null;
+
+        factory.getPersistenceManager().update(t);
+        return t;
     }
 
     public void remove(Object o) {
-        //TODO: Implement remove
         if (o == null) {
             return;
         }

@@ -58,6 +58,7 @@ public class PersistenceManager {
     }
 
     public boolean remove(Object object) {
+        //TODO: Remove from main file not just meta file
         String fileName = createFileNameFromObject(object, true);
         MetaObject metaObject = getCachedMetaObject(object);
 
@@ -66,7 +67,15 @@ public class PersistenceManager {
         cachedMetaObjects.remove(metaObject.getId());
         saveMeta(metaObject, false);
 
-        return false;
+        return true;
+    }
+
+    public <T> boolean update(T t) {
+        //TODO: Better implementation, meta file is now saved twice in remove() and save()
+        remove(t);
+        save(t);
+
+        return true;
     }
 
     private boolean saveMeta(MetaObject metaObject, boolean append) {
