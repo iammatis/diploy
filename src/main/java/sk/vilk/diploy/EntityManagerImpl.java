@@ -22,7 +22,6 @@ public class EntityManagerImpl implements EntityManager {
 
     public void persist(Object o) {
         factory.getPersistenceManager().save(o);
-        entities.add(o);
     }
 
     public <T> T merge(T t) {
@@ -35,11 +34,10 @@ public class EntityManagerImpl implements EntityManager {
         if (o == null) {
             return;
         }
-        entities.remove(o);
+        factory.getPersistenceManager().remove(o);
     }
 
     public <T> T find(Class<T> aClass, Object o) {
-        //TODO: Implement find
         if (!isOpen()) {
             throw new PersistenceException("Entity manager is closed!");
         }
@@ -47,8 +45,8 @@ public class EntityManagerImpl implements EntityManager {
             throw new IllegalArgumentException("Object must not be null!");
         }
         //TODO: [Cache] Look for object in cache first
-        int object = entities.indexOf(o);
-        return (T) entities.get(object);
+        Object object = factory.getPersistenceManager().read(o);
+        return (T) object;
     }
 
     public <T> T find(Class<T> aClass, Object o, Map<String, Object> map) {

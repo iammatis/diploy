@@ -1,13 +1,17 @@
 package sk.vilk.diploy.model;
 
-public class MetaObject {
+import java.io.Serializable;
+
+public class MetaObject implements Serializable {
 
     private Object object;
+    private Object id;
     private long from;
     private int length;
 
-    public MetaObject(Object object, long from, int length) {
+    public MetaObject(Object object, Object id, long from, int length) {
         this.object = object;
+        this.id = id;
         this.from = from;
         this.length = length;
     }
@@ -18,6 +22,14 @@ public class MetaObject {
 
     public void setObject(Object object) {
         this.object = object;
+    }
+
+    public Object getId() {
+        return id;
+    }
+
+    public void setId(Object id) {
+        this.id = id;
     }
 
     public long getFrom() {
