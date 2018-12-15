@@ -1,25 +1,18 @@
 package sk.vilk.diploy;
 
-import sk.vilk.diploy.model.MetaObject;
-
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.metamodel.Metamodel;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
     private boolean closed = false;
 
-    private Set<String> entities;
-    private Map<String, String> entityMap = new HashMap<>();
     private PersistenceManager persistenceManager = new PersistenceManager();
-//    private AnnotationManager annotationManager;
+//    private EntityTransaction entityTransaction = new EntityTransactionImpl(fileManager);
 
     public EntityManagerFactoryImpl() {
-//        annotationManager = new AnnotationManager();
     }
 
     public EntityManager createEntityManager() {

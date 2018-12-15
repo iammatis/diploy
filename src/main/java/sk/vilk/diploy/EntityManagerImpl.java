@@ -14,27 +14,27 @@ public class EntityManagerImpl implements EntityManager {
 
     private boolean closed = false;
     private EntityManagerFactoryImpl factory;
-    private ArrayList<Object> entities = new ArrayList<Object>();
 
     public EntityManagerImpl(EntityManagerFactoryImpl factory) {
         this.factory = factory;
     }
 
     public void persist(Object o) {
-        factory.getPersistenceManager().save(o);
+        if (o == null) return;
+
+        factory.getPersistenceManager().persist(o);
     }
 
     public <T> T merge(T t) {
         if (t == null) return null;
 
-        factory.getPersistenceManager().update(t);
+        factory.getPersistenceManager().merge(t);
         return t;
     }
 
     public void remove(Object o) {
-        if (o == null) {
-            return;
-        }
+        if (o == null) return;
+
         factory.getPersistenceManager().remove(o);
     }
 
@@ -46,7 +46,7 @@ public class EntityManagerImpl implements EntityManager {
             throw new IllegalArgumentException("Object must not be null!");
         }
         //TODO: [Cache] Look for object in cache first
-        Object object = factory.getPersistenceManager().read(o);
+        Object object = factory.getPersistenceManager().find(o);
         return (T) object;
     }
 
