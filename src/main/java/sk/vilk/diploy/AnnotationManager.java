@@ -24,6 +24,7 @@ public class AnnotationManager {
     }
 
     private String getAttributeName(Object object, Class clazz) {
+//        FieldUtils.getFieldsListWithAnnotation(object.getClass(), clazz).isEmpty() // error
         Field[] fields = FieldUtils.getFieldsWithAnnotation(object.getClass(), clazz);
         return fields[0].getName();
     }

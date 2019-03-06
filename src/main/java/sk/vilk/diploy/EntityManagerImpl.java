@@ -233,8 +233,7 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     public EntityTransaction getTransaction() {
-        //TODO: Implement getTransaction
-        return null;
+        return new TransactionImpl();
     }
 
     public EntityManagerFactory getEntityManagerFactory() {
