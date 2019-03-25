@@ -16,8 +16,7 @@ class PersistenceManager {
     private Map<String, Object> entities = new HashMap<>();
 
     void persist(Object entity) {
-        // TODO: Get Entity id
-        String entityId = "id";
+        String entityId = AnnotationManager.getIdValue(entity);
 
         if (toBePersisted.containsKey(entityId) || entities.containsKey(entityId)) {
             throw new EntityExistsException("Entity with id: " + entityId + " already exists!");
@@ -29,6 +28,7 @@ class PersistenceManager {
 
         // TODO: Convert to String or use UUID model ?
         entityId = UUID.randomUUID().toString();
+        AnnotationManager.setIdValue(entity, entityId);
 
         /* TODO: Serialize entity
             Might not want to serialize but save as plain object
@@ -36,11 +36,13 @@ class PersistenceManager {
          byte[] entityBytes = null;
          */
         toBePersisted.put(entityId, entity);
+        for (Map.Entry entry: toBePersisted.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue());
+        }
     }
 
     void remove(Object entity) {
-        // TODO: Get Entity id
-        String entityId = "";
+        String entityId = AnnotationManager.getIdValue(entity);
 
         /* TODO: Serialize entity
             Might not want to serialize but save as plain object
