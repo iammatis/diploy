@@ -229,8 +229,4 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     public PersistenceManager getPersistenceManager() {
         return persistenceManager;
     }
-
-    public void setPersistenceManager(PersistenceManager persistenceManager) {
-        this.persistenceManager = persistenceManager;
-    }
 }

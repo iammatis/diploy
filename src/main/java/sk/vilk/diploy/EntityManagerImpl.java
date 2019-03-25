@@ -12,11 +12,14 @@ import java.util.Map;
 
 public class EntityManagerImpl implements EntityManager {
 
+    // Variable to tell if Entity Manager is closed
     private boolean closed = false;
     private EntityManagerFactoryImpl factory;
+    private PersistenceManager persistenceManager;
 
-    public EntityManagerImpl(EntityManagerFactoryImpl factory) {
+    EntityManagerImpl(EntityManagerFactoryImpl factory) {
         this.factory = factory;
+        persistenceManager = new PersistenceManager();
     }
 
     /**
@@ -36,7 +39,8 @@ public class EntityManagerImpl implements EntityManager {
      *                                      PersistenceContextType.TRANSACTION.
      */
     public void persist(Object entity) {
-        //TODO: Implement persist
+        // TODO: Exceptions
+        this.persistenceManager.persist(entity);
     }
 
     /**
@@ -69,7 +73,8 @@ public class EntityManagerImpl implements EntityManager {
      *                                      PersistenceContextType.TRANSACTION.
      */
     public void remove(Object entity) {
-        //TODO: Implement remove
+        //TODO: Exceptions
+        this.persistenceManager.remove(entity);
     }
 
     /**
@@ -88,8 +93,11 @@ public class EntityManagerImpl implements EntityManager {
      *                                  is null
      */
     public <T> T find(Class<T> entityClass, Object primaryKey) {
-        //TODO: Implement find
-        return null;
+        //TODO: Exceptions
+        if (!(primaryKey instanceof String)) {
+            throw new IllegalArgumentException("Primary Key is not a String (UUID)!");
+        }
+        return this.persistenceManager.find(entityClass, primaryKey);
     }
 
     /**
@@ -112,7 +120,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  is null
      */
     public <T> T find(Class<T> entityClass, Object primaryKey, Map<String, Object> properties) {
-        //TODO: Implement find
+        //TODO: Implement find with properties
         return null;
     }
 
@@ -159,7 +167,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                      is made
      */
     public <T> T find(Class<T> entityClass, Object primaryKey, LockModeType lockMode) {
-        //TODO: Implement find
+        //TODO: Implement find with lockMode
         return null;
     }
 
@@ -213,7 +221,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                      is made
      */
     public <T> T find(Class<T> entityClass, Object primaryKey, LockModeType lockMode, Map<String, Object> properties) {
-        //TODO: Implement find
+        //TODO: Implement find with properties and lockMode
         return null;
     }
 
@@ -900,8 +908,12 @@ public class EntityManagerImpl implements EntityManager {
      *                               entity manager
      */
     public EntityTransaction getTransaction() {
-        //TODO: Implement getTransaction
-        return null;
+        /*
+         TODO: Pass in PersistenceManager as argument ?
+               Current implementation requires access to entity Maps
+               Propagate with this ? To have methods to alter boolean of isInTransaction
+         */
+        return new EntityTransactionImpl(this.persistenceManager);
     }
 
     /**
