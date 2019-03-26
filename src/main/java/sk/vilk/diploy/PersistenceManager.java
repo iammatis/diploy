@@ -1,5 +1,7 @@
 package sk.vilk.diploy;
 
+import org.apache.commons.lang3.SerializationUtils;
+import sk.vilk.diploy.file.FileManager;
 import sk.vilk.diploy.meta.MetaManager;
 import sk.vilk.diploy.meta.MetaObject;
 import javax.persistence.EntityExistsException;
@@ -21,9 +23,12 @@ class PersistenceManager {
 
     PersistenceManager() {
         metaManager = new MetaManager();
+        metaManager.initMeta();
     }
 
     void persist(Object entity) {
+        System.out.println("starting persist");
+        System.out.println(entities);
         String entityId = AnnotationManager.getIdValue(entity);
 
         if (toBePersisted.containsKey(entityId) || entities.containsKey(entityId)) {
@@ -36,6 +41,7 @@ class PersistenceManager {
 
         // TODO: Convert to String or use UUID model ?
         entityId = UUID.randomUUID().toString();
+        // TODO: Should be id set now or at commit() ?
         AnnotationManager.setIdValue(entity, entityId);
 
         /* TODO: Serialize entity
@@ -65,14 +71,55 @@ class PersistenceManager {
             // If it's not there it does not exist
             if (metaObject == null) return null;
 
-            // TODO: Otherwise load it from Main file
-
-            // TODO: And save to entity Map
+            // Otherwise load it from Main file
+            // TODO: If byte[] is null => error occurred
+            byte[] entityBytes = FileManager.readEntity(metaObject);
+            // Deserialize byte array
+            Object entityObject = SerializationUtils.deserialize(entityBytes);
+            // And save to entity Map
+            entities.put((String) primaryKey, entityObject);
+            return (T) entityObject;
         }
-        return null;
+        return (T) entity;
     }
+
+
+    /*
+
+            GETTERS AND SETTERS
+
+     */
+
 
     public MetaManager getMetaManager() {
         return metaManager;
+    }
+
+    public Map<String, Object> getToBePersisted() {
+        return toBePersisted;
+    }
+
+    public void setToBePersisted(Map<String, Object> toBePersisted) {
+        this.toBePersisted = toBePersisted;
+    }
+
+    public Map<String, Object> getToBeRemoved() {
+        return toBeRemoved;
+    }
+
+    public void setToBeRemoved(Map<String, Object> toBeRemoved) {
+        this.toBeRemoved = toBeRemoved;
+    }
+
+    public Map<String, Object> getEntities() {
+        return entities;
+    }
+
+    public void addEntities(Map<String, Object> entities) {
+        this.entities.putAll(entities);
+    }
+
+    public void setEntities(Map<String, Object> entities) {
+        this.entities = entities;
     }
 }

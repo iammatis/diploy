@@ -9,6 +9,7 @@ import javax.persistence.metamodel.Metamodel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class EntityManagerImpl implements EntityManager {
 
@@ -16,6 +17,7 @@ public class EntityManagerImpl implements EntityManager {
     private boolean closed = false;
     private EntityManagerFactoryImpl factory;
     private PersistenceManager persistenceManager;
+    private EntityTransaction currentTransaction = null;
 
     EntityManagerImpl(EntityManagerFactoryImpl factory) {
         this.factory = factory;
@@ -913,7 +915,9 @@ public class EntityManagerImpl implements EntityManager {
                Current implementation requires access to entity Maps
                Propagate with this ? To have methods to alter boolean of isInTransaction
          */
-        return new EntityTransactionImpl(this.persistenceManager);
+        if (currentTransaction == null) currentTransaction = new EntityTransactionImpl(persistenceManager);
+
+        return currentTransaction;
     }
 
     /**
