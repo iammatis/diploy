@@ -1,11 +1,15 @@
 package sk.vilk.diploy.file;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sk.vilk.diploy.meta.MetaObject;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class MetaFileManager {
+
+    private static final Logger logger = LoggerFactory.getLogger(MetaFileManager.class);
 
     public static void saveAllMetaObjects(ArrayList metaObjects) {
         // TODO: Don't hardcode
@@ -18,10 +22,9 @@ public class MetaFileManager {
         ) {
             oos.writeObject(metaObjects);
         } catch (FileNotFoundException e) {
-            // TODO: Implement loggers
-            e.printStackTrace();
+            logger.error("Meta file: " + filename + " was not found!", e);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("An error occurred trying to save to Meta file " + filename, e);
         }
     }
 
@@ -39,12 +42,11 @@ public class MetaFileManager {
             Collection<MetaObject> metaObjects = (Collection<MetaObject>) ois.readObject();
             return metaObjects;
         } catch (FileNotFoundException e) {
-            // TODO: Implement loggers
-            e.printStackTrace();
+            logger.error("Meta file: " + filename + " was not found!", e);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("An error occurred trying to read from Meta file " + filename, e);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            logger.error("While reading Meta file found an unknown class", e);
         }
         return null;
     }

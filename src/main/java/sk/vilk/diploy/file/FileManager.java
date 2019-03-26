@@ -1,6 +1,8 @@
 package sk.vilk.diploy.file;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sk.vilk.diploy.meta.MetaObject;
 import java.io.*;
 import java.util.HashMap;
@@ -8,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 public class FileManager {
+
+    private static final Logger logger = LoggerFactory.getLogger(FileManager.class);
 
     /*
 
@@ -25,10 +29,9 @@ public class FileManager {
             // Return file length used to create new Meta Object
             return file.length();
         } catch (FileNotFoundException e) {
-            // TODO: Implement loggers
-            e.printStackTrace();
+            logger.error("Main file: " + filename + " was not found!", e);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("An error occurred trying to save to Main file " + filename, e);
         }
         return 0;
     }
@@ -43,10 +46,9 @@ public class FileManager {
             fis.read(bytes);
             return bytes;
         } catch (FileNotFoundException e) {
-            // TODO: Implement loggers
-            e.printStackTrace();
+            logger.error("Main file: " + filename + " was not found!", e);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("An error occurred trying to read from Main file " + filename, e);
         }
         return null;
     }
@@ -70,10 +72,9 @@ public class FileManager {
                 list.put(entry.getKey(), List.of(file.length(), bytes.length));
             }
         } catch (FileNotFoundException e) {
-            // TODO: Implement loggers
-            e.printStackTrace();
+            logger.error("Main file: " + filename + " was not found!", e);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("An error occurred trying to save to Main file " + filename, e);
         }
 
         return list;
