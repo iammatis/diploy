@@ -1,5 +1,7 @@
 package sk.vilk.diploy;
 
+import sk.vilk.diploy.meta.MetaManager;
+import sk.vilk.diploy.meta.MetaObject;
 import javax.persistence.EntityExistsException;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +16,12 @@ class PersistenceManager {
     private Map<String, Object> toBeRemoved = new HashMap<>();
     // Entities loaded from file (database) or persisted
     private Map<String, Object> entities = new HashMap<>();
+    // MetaManager
+    private MetaManager metaManager;
+
+    PersistenceManager() {
+        metaManager = new MetaManager();
+    }
 
     void persist(Object entity) {
         String entityId = AnnotationManager.getIdValue(entity);
@@ -36,9 +44,6 @@ class PersistenceManager {
          byte[] entityBytes = null;
          */
         toBePersisted.put(entityId, entity);
-        for (Map.Entry entry: toBePersisted.entrySet()) {
-            System.out.println(entry.getKey() + " - " + entry.getValue());
-        }
     }
 
     void remove(Object entity) {
@@ -55,10 +60,19 @@ class PersistenceManager {
     <T> T find(Class<T> entityClass, Object primaryKey) {
         Object entity = entities.get(primaryKey);
         if (entity == null) {
-            /* TODO: Look for entity in Meta File and take it out of file
-                Then put it to entity Map
-             */
+            // First look in metaObjects
+            MetaObject metaObject = getMetaManager().get(primaryKey);
+            // If it's not there it does not exist
+            if (metaObject == null) return null;
+
+            // TODO: Otherwise load it from Main file
+
+            // TODO: And save to entity Map
         }
         return null;
+    }
+
+    public MetaManager getMetaManager() {
+        return metaManager;
     }
 }

@@ -21,6 +21,9 @@ public class AnnotationManager {
 
     private static String getIdName(Object object) {
         Field[] fields = FieldUtils.getFieldsWithAnnotation(object.getClass(), javax.persistence.Id.class);
+        /* TODO: If more than one field is returned => throw Exception (there can be only one Id field)
+                 If none is returned => throw Exception (there has to be exactly one field)
+         */
         return fields[0].getName();
     }
 
