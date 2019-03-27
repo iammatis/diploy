@@ -18,6 +18,7 @@ public class EntityManagerImpl implements EntityManager {
     private EntityManagerFactoryImpl factory;
     private PersistenceManager persistenceManager;
     private EntityTransaction currentTransaction = null;
+    private FlushModeType flushModeType = FlushModeType.AUTO;
 
     EntityManagerImpl(EntityManagerFactoryImpl factory) {
         this.factory = factory;
@@ -273,7 +274,7 @@ public class EntityManagerImpl implements EntityManager {
      * @param flushMode
      */
     public void setFlushMode(FlushModeType flushMode) {
-        //TODO: Implement setFlushMode
+        flushModeType = flushMode;
     }
 
     /**
@@ -283,8 +284,7 @@ public class EntityManagerImpl implements EntityManager {
      * @return flushMode
      */
     public FlushModeType getFlushMode() {
-        //TODO: Implement getFlushMode
-        return null;
+        return flushModeType;
     }
 
     /**
