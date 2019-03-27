@@ -3,7 +3,6 @@ package sk.vilk.diploy;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.Field;
 
 class AnnotationManager {
@@ -26,11 +25,13 @@ class AnnotationManager {
 
     private static String getIdName(Object object) throws Exception {
         Field[] fields = FieldUtils.getFieldsWithAnnotation(object.getClass(), javax.persistence.Id.class);
+
         // fields need to consist of exactly one element => There can't be more than one Id.class in Entity class
         if (fields.length != 1) {
             // TODO: Implement custom exception ?
             throw new Exception("No id field found!");
         }
+
         return fields[0].getName();
     }
 

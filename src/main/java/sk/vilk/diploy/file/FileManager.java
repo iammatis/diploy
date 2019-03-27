@@ -64,7 +64,7 @@ public class FileManager {
         String filename = "diploy.bin";
         Map<String, List<? extends Number>> list = new HashMap<>();
 
-        try (FileOutputStream fos = new FileOutputStream(filename)) {
+        try (FileOutputStream fos = new FileOutputStream(filename, true)) {
             File file = new File(filename);
             for (Map.Entry<String, Object> entry: toBePersisted.entrySet()) {
                 byte[] bytes = SerializationUtils.serialize((Serializable) entry.getValue());
