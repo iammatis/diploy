@@ -31,6 +31,7 @@ public class PersistenceTest {
         mainFile.delete();
         metaFile.delete();
         em.close();
+        factory.close();
     }
 
     @Test

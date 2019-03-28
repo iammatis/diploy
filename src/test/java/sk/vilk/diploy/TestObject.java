@@ -25,6 +25,9 @@ public class TestObject implements Serializable {
         this.salary = salary;
     }
 
+    public TestObject() {
+    }
+
     public String getId() {
         return id;
     }

@@ -42,6 +42,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                      PersistenceContextType.TRANSACTION.
      */
     public void persist(Object entity) {
+        verifyOpen();
         // TODO: Exceptions
         this.persistenceManager.persist(entity);
     }
@@ -60,6 +61,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                      PersistenceContextType.TRANSACTION.
      */
     public <T> T merge(T entity) {
+        verifyOpen();
         //TODO: Implement merge
         return null;
     }
@@ -76,6 +78,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                      PersistenceContextType.TRANSACTION.
      */
     public void remove(Object entity) {
+        verifyOpen();
         //TODO: Exceptions
         this.persistenceManager.remove(entity);
     }
@@ -96,6 +99,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  is null
      */
     public <T> T find(Class<T> entityClass, Object primaryKey) {
+        verifyOpen();
         //TODO: Exceptions
         if (!(primaryKey instanceof String)) {
             throw new IllegalArgumentException("Primary Key is not a String (UUID)!");
@@ -123,6 +127,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  is null
      */
     public <T> T find(Class<T> entityClass, Object primaryKey, Map<String, Object> properties) {
+        verifyOpen();
         //TODO: Implement find with properties
         return null;
     }
@@ -170,6 +175,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                      is made
      */
     public <T> T find(Class<T> entityClass, Object primaryKey, LockModeType lockMode) {
+        verifyOpen();
         //TODO: Implement find with lockMode
         return null;
     }
@@ -224,6 +230,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                      is made
      */
     public <T> T find(Class<T> entityClass, Object primaryKey, LockModeType lockMode, Map<String, Object> properties) {
+        verifyOpen();
         //TODO: Implement find with properties and lockMode
         return null;
     }
@@ -250,6 +257,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  cannot be accessed
      */
     public <T> T getReference(Class<T> entityClass, Object primaryKey) {
+        verifyOpen();
         //TODO: Implement getReference
         return null;
     }
@@ -264,6 +272,7 @@ public class EntityManagerImpl implements EntityManager {
      * @throws PersistenceException         if the flush fails
      */
     public void flush() {
+        verifyOpen();
         persistenceManager.flush();
     }
 
@@ -274,6 +283,7 @@ public class EntityManagerImpl implements EntityManager {
      * @param flushMode
      */
     public void setFlushMode(FlushModeType flushMode) {
+        verifyOpen();
         flushModeType = flushMode;
     }
 
@@ -284,6 +294,7 @@ public class EntityManagerImpl implements EntityManager {
      * @return flushMode
      */
     public FlushModeType getFlushMode() {
+        verifyOpen();
         return flushModeType;
     }
 
@@ -322,6 +333,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                      is made
      */
     public void lock(Object entity, LockModeType lockMode) {
+        verifyOpen();
         //TODO: Implement lock
     }
 
@@ -369,6 +381,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                      is made
      */
     public void lock(Object entity, LockModeType lockMode, Map<String, Object> properties) {
+        verifyOpen();
         //TODO: Implement lock
     }
 
@@ -387,6 +400,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                      exists in the database
      */
     public void refresh(Object entity) {
+        verifyOpen();
         //TODO: Implement refresh
     }
 
@@ -410,6 +424,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                      exists in the database
      */
     public void refresh(Object entity, Map<String, Object> properties) {
+        verifyOpen();
         //TODO: Implement refresh
     }
 
@@ -447,6 +462,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                      is made
      */
     public void refresh(Object entity, LockModeType lockMode) {
+        verifyOpen();
         //TODO: Implement refresh
     }
 
@@ -492,6 +508,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                      is made
      */
     public void refresh(Object entity, LockModeType lockMode, Map<String, Object> properties) {
+        verifyOpen();
         //TODO: Implement refresh
     }
 
@@ -518,6 +535,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  entity
      */
     public void detach(Object entity) {
+        verifyOpen();
         //TODO: Implement detach
     }
 
@@ -546,6 +564,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                      managed entity and a transaction is active
      */
     public LockModeType getLockMode(Object entity) {
+        verifyOpen();
         //TODO: Implement getLockMode
         return null;
     }
@@ -560,6 +579,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  not valid for the implementation
      */
     public void setProperty(String propertyName, Object value) {
+        verifyOpen();
         //TODO: Implement getProperties
     }
 
@@ -585,6 +605,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  found to be invalid
      */
     public Query createQuery(String qlString) {
+        verifyOpen();
         //TODO: Implement createQuery
         return null;
     }
@@ -599,6 +620,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  found to be invalid
      */
     public <T> TypedQuery<T> createQuery(CriteriaQuery<T> criteriaQuery) {
+        verifyOpen();
         //TODO: Implement createQuery
         return null;
     }
@@ -613,6 +635,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  found to be invalid
      */
     public Query createQuery(CriteriaUpdate updateQuery) {
+        verifyOpen();
         //TODO: Implement createQuery
         return null;
     }
@@ -627,6 +650,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  found to be invalid
      */
     public Query createQuery(CriteriaDelete deleteQuery) {
+        verifyOpen();
         //TODO: Implement createQuery
         return null;
     }
@@ -646,6 +670,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  not be assignable to the specified type
      */
     public <T> TypedQuery<T> createQuery(String qlString, Class<T> resultClass) {
+        verifyOpen();
         //TODO: Implement createQuery
         return null;
     }
@@ -661,6 +686,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  found to be invalid
      */
     public Query createNamedQuery(String name) {
+        verifyOpen();
         //TODO: Implement createNamedQuery
         return null;
     }
@@ -681,6 +707,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  not be assignable to the specified type
      */
     public <T> TypedQuery<T> createNamedQuery(String name, Class<T> resultClass) {
+        verifyOpen();
         //TODO: Implement createNamedQuery
         return null;
     }
@@ -700,6 +727,7 @@ public class EntityManagerImpl implements EntityManager {
      * @return the new query instance
      */
     public Query createNativeQuery(String sqlString) {
+        verifyOpen();
         //TODO: Implement createNativeQuery
         return null;
     }
@@ -713,6 +741,7 @@ public class EntityManagerImpl implements EntityManager {
      * @return the new query instance
      */
     public Query createNativeQuery(String sqlString, Class resultClass) {
+        verifyOpen();
         //TODO: Implement createNativeQuery
         return null;
     }
@@ -726,6 +755,7 @@ public class EntityManagerImpl implements EntityManager {
      * @return the new query instance
      */
     public Query createNativeQuery(String sqlString, String resultSetMapping) {
+        verifyOpen();
         //TODO: Implement createNativeQuery
         return null;
     }
@@ -741,6 +771,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  defined with the given name
      */
     public StoredProcedureQuery createNamedStoredProcedureQuery(String name) {
+        verifyOpen();
         //TODO: Implement createNamedStoredProcedureQuery
         return null;
     }
@@ -761,6 +792,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  will fail)
      */
     public StoredProcedureQuery createStoredProcedureQuery(String procedureName) {
+        verifyOpen();
         //TODO: Implement createStoredProcedureQuery
         return null;
     }
@@ -785,6 +817,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  will fail)
      */
     public StoredProcedureQuery createStoredProcedureQuery(String procedureName, Class... resultClasses) {
+        verifyOpen();
         //TODO: Implement createStoredProcedureQuery
         return null;
     }
@@ -809,6 +842,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  (or the query execution will fail)
      */
     public StoredProcedureQuery createStoredProcedureQuery(String procedureName, String... resultSetMappings) {
+        verifyOpen();
         //TODO: Implement createStoredProcedureQuery
         return null;
     }
@@ -825,6 +859,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                      no transaction
      */
     public void joinTransaction() {
+        verifyOpen();
         //TODO: Implement joinTransaction
     }
 
@@ -837,6 +872,7 @@ public class EntityManagerImpl implements EntityManager {
      * @return boolean
      */
     public boolean isJoinedToTransaction() {
+        verifyOpen();
         //TODO: Implement isJoinedToTransaction
         return false;
     }
@@ -855,6 +891,7 @@ public class EntityManagerImpl implements EntityManager {
      *                              support the call
      */
     public <T> T unwrap(Class<T> cls) {
+        verifyOpen();
         //TODO: Implement unwrap
         return null;
     }
@@ -868,6 +905,7 @@ public class EntityManagerImpl implements EntityManager {
      * @return underlying provider object for EntityManager
      */
     public Object getDelegate() {
+        verifyOpen();
         //TODO: Implement getDelegate
         return null;
     }
@@ -887,8 +925,9 @@ public class EntityManagerImpl implements EntityManager {
      *                               is container-managed
      */
     public void close() {
-        //TODO: Implement close
         closed = true;
+        factory = null;
+        persistenceManager = null;
     }
 
     /**
@@ -941,6 +980,7 @@ public class EntityManagerImpl implements EntityManager {
      *                               been closed
      */
     public CriteriaBuilder getCriteriaBuilder() {
+        verifyOpen();
         //TODO: Implement getCriteriaBuilder
         return null;
     }
@@ -954,6 +994,7 @@ public class EntityManagerImpl implements EntityManager {
      *                               been closed
      */
     public Metamodel getMetamodel() {
+        verifyOpen();
         //TODO: Implement getMetamodel
         return null;
     }
@@ -966,6 +1007,7 @@ public class EntityManagerImpl implements EntityManager {
      * @return entity graph
      */
     public <T> EntityGraph<T> createEntityGraph(Class<T> rootType) {
+        verifyOpen();
         //TODO: Implement createEntityGraph
         return null;
     }
@@ -978,6 +1020,7 @@ public class EntityManagerImpl implements EntityManager {
      * @return entity graph
      */
     public EntityGraph<?> createEntityGraph(String graphName) {
+        verifyOpen();
         //TODO: Implement createEntityGraph
         return null;
     }
@@ -992,6 +1035,7 @@ public class EntityManagerImpl implements EntityManager {
      *                                  the given name
      */
     public EntityGraph<?> getEntityGraph(String graphName) {
+        verifyOpen();
         //TODO: Implement getEntityGraph
         return null;
     }
@@ -1005,8 +1049,15 @@ public class EntityManagerImpl implements EntityManager {
      * @throws IllegalArgumentException if the class is not an entity
      */
     public <T> List<EntityGraph<? super T>> getEntityGraphs(Class<T> entityClass) {
+        verifyOpen();
         //TODO: Implement getEntityGraphs
         return null;
+    }
+
+    public void verifyOpen() {
+        if (!isOpen()) {
+            throw new IllegalStateException("Entity Manager is already closed!");
+        }
     }
 
 }
