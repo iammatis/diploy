@@ -530,8 +530,8 @@ public class EntityManagerImpl implements EntityManager {
      * @throws IllegalArgumentException if not an entity
      */
     public boolean contains(Object entity) {
-        //TODO: Implement contains
-        return false;
+        if (!isOpen()) throw new IllegalStateException("Entity Manager has been closed!");
+        return persistenceManager.contains(entity);
     }
 
     /**

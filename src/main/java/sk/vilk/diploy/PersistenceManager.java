@@ -112,6 +112,11 @@ class PersistenceManager {
         MetaFileManager.saveAllMetaObjects(new ArrayList(metaManager.getMetaObjects().values()));
     }
 
+    public boolean contains(Object entity) {
+        String entityId = AnnotationManager.getIdValue(entity);
+        return entities.containsKey(entityId);
+    }
+
 
     /*
 
