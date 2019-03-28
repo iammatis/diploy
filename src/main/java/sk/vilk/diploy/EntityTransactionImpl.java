@@ -2,7 +2,6 @@ package sk.vilk.diploy;
 
 import sk.vilk.diploy.file.FileManager;
 import sk.vilk.diploy.file.MetaFileManager;
-import sk.vilk.diploy.meta.MetaManager;
 import sk.vilk.diploy.meta.MetaObject;
 import javax.persistence.EntityTransaction;
 import java.util.ArrayList;

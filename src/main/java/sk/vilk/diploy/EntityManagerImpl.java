@@ -264,7 +264,7 @@ public class EntityManagerImpl implements EntityManager {
      * @throws PersistenceException         if the flush fails
      */
     public void flush() {
-        //TODO: Implement flush
+        persistenceManager.flush();
     }
 
     /**
@@ -928,6 +928,7 @@ public class EntityManagerImpl implements EntityManager {
      *                               been closed
      */
     public EntityManagerFactory getEntityManagerFactory() {
+        if (!isOpen()) throw new IllegalStateException("Entity Manager has been closed!");
         return factory;
     }
 

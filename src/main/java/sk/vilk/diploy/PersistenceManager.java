@@ -2,12 +2,14 @@ package sk.vilk.diploy;
 
 import org.apache.commons.lang3.SerializationUtils;
 import sk.vilk.diploy.file.FileManager;
+import sk.vilk.diploy.file.MetaFileManager;
 import sk.vilk.diploy.meta.MetaManager;
 import sk.vilk.diploy.meta.MetaObject;
 import javax.persistence.EntityExistsException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.io.Serializable;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class PersistenceManager {
 
@@ -18,6 +20,7 @@ class PersistenceManager {
     private Map<String, Object> toBeRemoved = new HashMap<>();
     // Entities loaded from file (database) or persisted
     private Map<String, Object> entities = new HashMap<>();
+    private Map<String, Object> untouched = new HashMap<>();
     // MetaManager
     private MetaManager metaManager;
 
@@ -27,8 +30,6 @@ class PersistenceManager {
     }
 
     void persist(Object entity) {
-        System.out.println("starting persist");
-        System.out.println(entities);
         String entityId = AnnotationManager.getIdValue(entity);
 
         if (toBePersisted.containsKey(entityId) || entities.containsKey(entityId)) {
@@ -76,11 +77,39 @@ class PersistenceManager {
             byte[] entityBytes = FileManager.readEntity(metaObject);
             // Deserialize byte array
             Object entityObject = SerializationUtils.deserialize(entityBytes);
+            // Java is pass-by-value => therefore we need to clone the entity's object
+            Object clonedEntity = SerializationUtils.clone((Serializable) entityObject);
             // And save to entity Map
             entities.put((String) primaryKey, entityObject);
+            untouched.put((String) primaryKey, clonedEntity);
             return (T) entityObject;
         }
         return (T) entity;
+    }
+
+    void flush() {
+        /*
+            TODO:
+                1. Go through _ entity Map
+                2. Compare with _ entity Map
+                3. Save entities with non-matching hashcodes
+         */
+        Stream<Map.Entry<String, Object>> dirtyEntities = entities
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().hashCode() != untouched.get(entry.getKey()).hashCode());
+
+        Map<String, List<? extends Number>> metaObjects = FileManager.saveEntities(dirtyEntities.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+        // Save Meta Objects to Map
+        for (Map.Entry<String, List<? extends Number>> entry: metaObjects.entrySet()) {
+            long fileLength = entry.getValue().get(0).longValue();
+            int bytesLength = entry.getValue().get(1).intValue();
+            metaManager.add(entry.getKey(), fileLength, bytesLength);
+        }
+
+        // Write metaObjects to Meta File
+        MetaFileManager.saveAllMetaObjects(new ArrayList(metaManager.getMetaObjects().values()));
     }
 
 
