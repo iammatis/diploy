@@ -112,6 +112,23 @@ class PersistenceManager {
         MetaFileManager.saveAllMetaObjects(new ArrayList(metaManager.getMetaObjects().values()));
     }
 
+    void refresh(Object entity) {
+        String entityId = AnnotationManager.getIdValue(entity);
+
+        Object managedEntity = entities.get(entityId);
+        System.out.println("managed entity");
+        System.out.println(managedEntity);
+        if (managedEntity == null) throw new IllegalArgumentException("Entity is not managed!");
+
+        Object untouchedEntity = untouched.get(entityId);
+        System.out.println("untouched entity");
+        System.out.println(untouchedEntity);
+        Object clonedEntity = SerializationUtils.clone((Serializable) untouchedEntity);
+        entities.replace(entityId, clonedEntity);
+        System.out.println("entities");
+        System.out.println(entities);
+    }
+
 
     /*
 

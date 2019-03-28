@@ -387,7 +387,8 @@ public class EntityManagerImpl implements EntityManager {
      *                                      exists in the database
      */
     public void refresh(Object entity) {
-        //TODO: Implement refresh
+        //TODO: Implement Exceptions
+        persistenceManager.refresh(entity);
     }
 
     /**
