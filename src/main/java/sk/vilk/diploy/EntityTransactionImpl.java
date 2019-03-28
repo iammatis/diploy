@@ -59,6 +59,8 @@ public class EntityTransactionImpl implements EntityTransaction {
         persistenceManager.addEntities(this.persistenceManager.getToBePersisted());
         this.persistenceManager.setToBePersisted(new HashMap<>());
 
+        isActive = false;
+
         // TODO: Lock access to both Maps ? Necessary or not ?
 
         // TODO: Remove from Meta File
