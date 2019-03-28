@@ -145,7 +145,11 @@ class PersistenceManager {
     }
 
     public void addEntities(Map<String, Object> entities) {
-        this.entities.putAll(entities);
+        for (Map.Entry<String, Object> entity: entities.entrySet()) {
+            this.entities.put(entity.getKey(), entity.getValue());
+            this.untouched.put(entity.getKey(), SerializationUtils.clone((Serializable) entity.getValue()));
+        }
+//        this.entities.putAll(entities);
     }
 
     public void setEntities(Map<String, Object> entities) {
