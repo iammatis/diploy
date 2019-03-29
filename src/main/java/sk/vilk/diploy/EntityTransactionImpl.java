@@ -83,7 +83,7 @@ public class EntityTransactionImpl implements EntityTransaction {
         }
 
         // Save Meta Objects
-        MetaFileManager.saveAllMetaObjects(new ArrayList(metaObjects.values()));
+        MetaFileManager.saveAllMetaObjects(metaObjects);
         // Save entity bytes to File
         FileManager.saveEntities(bytesToSave);
 

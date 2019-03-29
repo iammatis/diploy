@@ -6,12 +6,13 @@ import sk.vilk.diploy.meta.MetaObject;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 public class MetaFileManager {
 
     private static final Logger logger = LoggerFactory.getLogger(MetaFileManager.class);
 
-    public static void saveAllMetaObjects(ArrayList metaObjects) {
+    public static void saveAllMetaObjects(Map<String, MetaObject> metaObjects) {
         // TODO: Don't hardcode
         String filename = "diploy_meta.bin";
 
@@ -28,7 +29,7 @@ public class MetaFileManager {
         }
     }
 
-    public static Collection<MetaObject> readAllMetaObjects() {
+    public static Map<String, MetaObject> readAllMetaObjects() {
         // TODO: Don't hardcode
         String filename = "diploy_meta.bin";
 
@@ -39,8 +40,7 @@ public class MetaFileManager {
                 FileInputStream fis = new FileInputStream(file);
                 ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(fis))
         ) {
-            Collection<MetaObject> metaObjects = (Collection<MetaObject>) ois.readObject();
-            return metaObjects;
+            return (Map<String, MetaObject>) ois.readObject();
         } catch (FileNotFoundException e) {
             logger.error("Meta file: " + filename + " was not found!", e);
         } catch (IOException e) {

@@ -110,7 +110,7 @@ class PersistenceManager {
         }
 
         // Write metaObjects to Meta File
-        MetaFileManager.saveAllMetaObjects(new ArrayList(metaManager.getMetaObjects().values()));
+        MetaFileManager.saveAllMetaObjects(metaManager.getMetaObjects());
     }
 
     public boolean contains(Object entity) {
