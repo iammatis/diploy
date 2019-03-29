@@ -119,6 +119,12 @@ class PersistenceManager {
     }
 
 
+    void detach(Object entity) {
+        String entityId = AnnotationManager.getIdValue(entity);
+        managedEntities.remove(entityId);
+    }
+
+
     /*
 
             GETTERS AND SETTERS

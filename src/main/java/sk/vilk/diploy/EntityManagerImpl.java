@@ -536,7 +536,8 @@ public class EntityManagerImpl implements EntityManager {
      */
     public void detach(Object entity) {
         verifyOpen();
-        //TODO: Implement detach
+        //TODO: Implement Exceptions
+        persistenceManager.detach(entity);
     }
 
     /**
