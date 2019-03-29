@@ -23,11 +23,14 @@ public class FileManager {
         // TODO: Do not hardcode
         String filename = "diploy.bin";
 
-        try (FileOutputStream fos = new FileOutputStream(filename, true)) {
+        try (FileOutputStream fos = new FileOutputStream(filename, true);
+             BufferedOutputStream bos = new BufferedOutputStream(fos)
+        ) {
             File file = new File(filename);
-            fos.write(entityBytes);
+            long fileLength = file.length();
+            bos.write(entityBytes);
             // Return file length used to create new Meta Object
-            return file.length();
+            return fileLength + entityBytes.length;
         } catch (FileNotFoundException e) {
             logger.error("Main file: " + filename + " was not found!", e);
         } catch (IOException e) {
@@ -40,10 +43,12 @@ public class FileManager {
         // TODO: Do not hardcode
         String filename = "diploy.bin";
 
-        try (FileInputStream fis = new FileInputStream(filename)) {
+        try (FileInputStream fis = new FileInputStream(filename);
+             BufferedInputStream bis = new BufferedInputStream(fis)
+        ) {
             byte[] bytes = new byte[metaObject.getLength()];
             fis.getChannel().position(metaObject.getFrom());
-            fis.read(bytes);
+            bis.read(bytes);
             return bytes;
         } catch (FileNotFoundException e) {
             logger.error("Main file: " + filename + " was not found!", e);
@@ -64,12 +69,17 @@ public class FileManager {
         String filename = "diploy.bin";
         Map<String, List<? extends Number>> list = new HashMap<>();
 
-        try (FileOutputStream fos = new FileOutputStream(filename, true)) {
+        try (FileOutputStream fos = new FileOutputStream(filename, true);
+             BufferedOutputStream bos = new BufferedOutputStream(fos)
+        ) {
             File file = new File(filename);
+            long fileLength = file.length();
             for (Map.Entry<String, Object> entry: toBePersisted.entrySet()) {
                 byte[] bytes = SerializationUtils.serialize((Serializable) entry.getValue());
-                fos.write(bytes);
-                list.put(entry.getKey(), List.of(file.length(), bytes.length));
+                bos.write(bytes);
+                int bytesLength = bytes.length;
+                fileLength += bytesLength;
+                list.put(entry.getKey(), List.of(fileLength, bytesLength));
             }
         } catch (FileNotFoundException e) {
             logger.error("Main file: " + filename + " was not found!", e);

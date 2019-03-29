@@ -18,7 +18,7 @@ public class MetaFileManager {
         File file = new File(filename);
         try (
                 FileOutputStream fos = new FileOutputStream(file);
-                ObjectOutputStream oos = new ObjectOutputStream(fos)
+                ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(fos))
         ) {
             oos.writeObject(metaObjects);
         } catch (FileNotFoundException e) {
@@ -37,7 +37,7 @@ public class MetaFileManager {
 
         try (
                 FileInputStream fis = new FileInputStream(file);
-                ObjectInputStream ois = new ObjectInputStream(fis)
+                ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(fis))
         ) {
             Collection<MetaObject> metaObjects = (Collection<MetaObject>) ois.readObject();
             return metaObjects;
