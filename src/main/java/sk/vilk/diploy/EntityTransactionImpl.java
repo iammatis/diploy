@@ -64,8 +64,8 @@ public class EntityTransactionImpl implements EntityTransaction {
         History.createUndoLog(pairsOfActionAndId, savingTime);
 
         // Loop through toBeCommitted Map
-        Map<String, Object> entities = persistenceManager.getEntities();
-        Map<String, Object> untouched = persistenceManager.getUntouched();
+        Map<String, Object> managed = persistenceManager.getManagedEntities();
+        Map<String, Object> persisted = persistenceManager.getPersistedEntities();
         Map<String, MetaObject> metaObjects = persistenceManager.getMetaManager().getMetaObjects();
         ArrayList<byte[]> bytesToSave = new ArrayList<>();
         long fileLength = getFileLength();
@@ -83,13 +83,13 @@ public class EntityTransactionImpl implements EntityTransaction {
 
                     int bytesLength = bytes.length;
                     MetaObject metaObject = createMetaObject(id, fileLength, bytesLength);
-                    addEntityToMaps(entities, untouched, metaObjects, id, entity, metaObject);
+                    addEntityToMaps(managed, persisted, metaObjects, id, entity, metaObject);
 
                     fileLength += bytesLength;
                     break;
                 case REMOVE:
-                    entities.remove(id);
-                    untouched.remove(id);
+                    managed.remove(id);
+                    persisted.remove(id);
                     metaObjects.remove(id);
                     break;
             }
@@ -113,8 +113,8 @@ public class EntityTransactionImpl implements EntityTransaction {
 
         List<MutablePair<CommitAction, String>> listOfPairs = History.readUndoLog(savingTime);
         Map<String, MetaObject> metaObjects = persistenceManager.getMetaManager().getMetaObjects();
-        Map<String, Object> entities = persistenceManager.getEntities();
-        Map<String, Object> untouched = persistenceManager.getUntouched();
+        Map<String, Object> entities = persistenceManager.getManagedEntities();
+        Map<String, Object> untouched = persistenceManager.getPersistedEntities();
         Map<String, Pair<CommitAction, Object>> toBeCommitted = persistenceManager.getToBeCommitted();
 
         ArrayList<byte[]> bytesToSave = new ArrayList<>();

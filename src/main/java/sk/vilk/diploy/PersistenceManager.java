@@ -20,8 +20,8 @@ class PersistenceManager {
     private Map<String, Pair<CommitAction, Object>> toBeCommitted = new HashMap<>();
     // UUID - Entity Object
     // Entities loaded from file (database) or persisted
-    private Map<String, Object> entities = new HashMap<>();
-    private Map<String, Object> untouched = new HashMap<>();
+    private Map<String, Object> managedEntities = new HashMap<>();
+    private Map<String, Object> persistedEntities = new HashMap<>();
     // MetaManager
     private MetaManager metaManager;
 
@@ -33,7 +33,7 @@ class PersistenceManager {
     void persist(Object entity) {
         String entityId = AnnotationManager.getIdValue(entity);
 
-        if (toBeCommitted.containsKey(entityId) || entities.containsKey(entityId)) {
+        if (toBeCommitted.containsKey(entityId) || managedEntities.containsKey(entityId)) {
             throw new EntityExistsException("Entity with id: " + entityId + " already exists!");
         }
 
@@ -66,7 +66,7 @@ class PersistenceManager {
     }
 
     <T> T find(Class<T> entityClass, Object primaryKey) {
-        Object entity = entities.get(primaryKey);
+        Object entity = managedEntities.get(primaryKey);
         if (entity == null) {
             // First look in metaObjects
             MetaObject metaObject = getMetaManager().get(primaryKey);
@@ -81,8 +81,8 @@ class PersistenceManager {
             // Java is pass-by-value => therefore we need to clone the entity's object
             Object clonedEntity = SerializationUtils.clone((Serializable) entityObject);
             // And save to entity Map
-            entities.put((String) primaryKey, entityObject);
-            untouched.put((String) primaryKey, clonedEntity);
+            managedEntities.put((String) primaryKey, entityObject);
+            persistedEntities.put((String) primaryKey, clonedEntity);
             return (T) entityObject;
         }
         return (T) entity;
@@ -93,12 +93,12 @@ class PersistenceManager {
             TODO:
                 1. Go through _ entity Map
                 2. Compare with _ entity Map
-                3. Save entities with non-matching hashcodes
+                3. Save managedEntities with non-matching hashcodes
          */
-        Stream<Map.Entry<String, Object>> dirtyEntities = entities
+        Stream<Map.Entry<String, Object>> dirtyEntities = managedEntities
                 .entrySet()
                 .stream()
-                .filter(entry -> entry.getValue().hashCode() != untouched.get(entry.getKey()).hashCode());
+                .filter(entry -> entry.getValue().hashCode() != persistedEntities.get(entry.getKey()).hashCode());
 
         Map<String, List<? extends Number>> metaObjects = FileManager.saveEntities(dirtyEntities.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
@@ -113,9 +113,9 @@ class PersistenceManager {
         MetaFileManager.saveAllMetaObjects(metaManager.getMetaObjects());
     }
 
-    public boolean contains(Object entity) {
+    boolean contains(Object entity) {
         String entityId = AnnotationManager.getIdValue(entity);
-        return entities.containsKey(entityId);
+        return managedEntities.containsKey(entityId);
     }
 
 
@@ -138,11 +138,11 @@ class PersistenceManager {
         toBeCommitted = new HashMap<>();
     }
 
-    public Map<String, Object> getEntities() {
-        return entities;
+    public Map<String, Object> getManagedEntities() {
+        return managedEntities;
     }
 
-    public Map<String, Object> getUntouched() {
-        return untouched;
+    public Map<String, Object> getPersistedEntities() {
+        return persistedEntities;
     }
 }
