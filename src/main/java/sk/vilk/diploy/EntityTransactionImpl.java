@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 public class EntityTransactionImpl implements EntityTransaction {
 
+    private static final String LOG_FORMAT = "YYYY-MM-dd H:m:s z";
     private PersistenceManager persistenceManager;
     private boolean isActive = false;
     private boolean rollbackOnly = false;
@@ -36,6 +37,7 @@ public class EntityTransactionImpl implements EntityTransaction {
     @Override
     public void begin() {
         if (isActive()) throw new IllegalStateException("Transaction is already active!");
+
         this.isActive = true;
         persistenceManager.clearToBeCommitted();
     }
@@ -44,11 +46,12 @@ public class EntityTransactionImpl implements EntityTransaction {
      * Commit the current resource transaction, writing any
      * unflushed changes to the database.
      * @throws IllegalStateException if isActive() is false
+     * TODO: RollbackException
      * @throws RollbackException if the commit fails
      */
     @Override
     public void commit() {
-        if (!isActive()) throw new IllegalStateException("No active transaction found!");
+        verifyIsActive();
 
         // Create log file
         setSavingTime();
@@ -100,14 +103,14 @@ public class EntityTransactionImpl implements EntityTransaction {
     /**
      * Roll back the current resource transaction.
      * @throws IllegalStateException if isActive() is false
+     * TODO: PersistenceException
 //     * @throws PersistenceException if an unexpected error
      * condition is encountered
      */
     @Override
     public void rollback() {
-        if (!isActive()) throw new IllegalStateException("No active transaction found!");
-        // TODO: Implement rollback
-        System.out.println("in rollback");
+        verifyIsActive();
+
         List<MutablePair<CommitAction, String>> listOfPairs = History.readUndoLog(savingTime);
         Map<String, MetaObject> metaObjects = persistenceManager.getMetaManager().getMetaObjects();
         Map<String, Object> entities = persistenceManager.getEntities();
@@ -159,6 +162,7 @@ public class EntityTransactionImpl implements EntityTransaction {
      */
     @Override
     public void setRollbackOnly() {
+        verifyIsActive();
         this.rollbackOnly = true;
     }
 
@@ -171,7 +175,7 @@ public class EntityTransactionImpl implements EntityTransaction {
      */
     @Override
     public boolean getRollbackOnly() {
-        if (!isActive()) throw new IllegalStateException("No active transaction found!");
+        verifyIsActive();
         return this.rollbackOnly;
     }
 
@@ -179,6 +183,7 @@ public class EntityTransactionImpl implements EntityTransaction {
      * Indicate whether a resource transaction is in progress.
      * @return boolean indicating whether transaction is
      * in progress
+     * TODO: PersistenceException
 //     * @throws PersistenceException if an unexpected error
      * condition is encountered
      */
@@ -187,11 +192,15 @@ public class EntityTransactionImpl implements EntityTransaction {
         return this.isActive;
     }
 
+    private void verifyIsActive() {
+        if (!isActive()) throw new IllegalStateException("No active transaction found!");
+    }
+
     /**
      * Set time when the commit happened
      */
     private void setSavingTime() {
-        SimpleDateFormat formatter = new SimpleDateFormat("YYYY-MM-dd H:m:s z");
+        SimpleDateFormat formatter = new SimpleDateFormat(LOG_FORMAT);
         savingTime = formatter.format(new Date());
     }
 

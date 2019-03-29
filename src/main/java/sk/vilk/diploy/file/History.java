@@ -7,6 +7,10 @@ import sk.vilk.diploy.CommitAction;
 import java.io.*;
 import java.util.List;
 
+/**
+ * This class is used to read and write undo logs,
+ * that are used in case commit fails
+ */
 public class History {
 
     private static final Logger logger = LoggerFactory.getLogger(History.class);
