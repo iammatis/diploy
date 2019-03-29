@@ -1,9 +1,6 @@
 package sk.vilk.diploy.meta;
 
 import sk.vilk.diploy.file.MetaFileManager;
-
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,10 +17,8 @@ public class MetaManager {
     }
 
     public void initMeta() {
-        Collection<MetaObject> collection = MetaFileManager.readAllMetaObjects();
-        if (collection != null) {
-            collection.forEach(metaObject -> add(metaObject.getId(), metaObject));
-        }
+        setMetaObjects(MetaFileManager.readAllMetaObjects());
+        if (metaObjects == null) setMetaObjects(new HashMap<>());
     }
 
     public MetaObject get(Object primaryKey) {
@@ -36,7 +31,7 @@ public class MetaManager {
                  Might throw an Exception!
          */
         // TODO: Save the whole HashMap or convert .values() to ArrayList ?
-        MetaFileManager.saveAllMetaObjects(new ArrayList(metaObjects.values()));
+        MetaFileManager.saveAllMetaObjects(metaObjects);
     }
 
     public void add(String primaryKey, long fileLength, int bytesLength) {

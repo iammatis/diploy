@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sk.vilk.diploy.meta.MetaObject;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,5 +89,22 @@ public class FileManager {
         }
 
         return list;
+    }
+
+    public static void saveEntities(ArrayList<byte[]> bytesToSave) {
+        // TODO: Do not hardcode
+        String filename = "diploy.bin";
+
+        try (FileOutputStream fos = new FileOutputStream(filename, true);
+             BufferedOutputStream bos = new BufferedOutputStream(fos)
+        ) {
+            for (byte[] bytes : bytesToSave) {
+                bos.write(bytes);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
