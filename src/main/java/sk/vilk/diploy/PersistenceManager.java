@@ -46,22 +46,11 @@ class PersistenceManager {
         // TODO: Should be id set now or at commit() ?
         AnnotationManager.setIdValue(entity, entityId);
 
-        /* TODO: Serialize entity
-            Might not want to serialize but save as plain object
-            HashCode comparison seems to be faster than byte array comparison
-         byte[] entityBytes = null;
-         */
         toBeCommitted.put(entityId, new MutablePair<>(CommitAction.PERSIST, entity));
     }
 
     void remove(Object entity) {
         String entityId = AnnotationManager.getIdValue(entity);
-
-        /* TODO: Serialize entity
-            Might not want to serialize but save as plain object
-            HashCode comparison seems to be faster than byte array comparison
-         byte[] entityBytes = null;
-         */
         toBeCommitted.put(entityId, new MutablePair<>(CommitAction.REMOVE, entity));
     }
 
@@ -89,17 +78,13 @@ class PersistenceManager {
     }
 
     void flush() {
-        /*
-            TODO:
-                1. Go through _ entity Map
-                2. Compare with _ entity Map
-                3. Save managedEntities with non-matching hashcodes
-         */
+        // Go though managed Entities and compare them with persisted Entities
         Stream<Map.Entry<String, Object>> dirtyEntities = managedEntities
                 .entrySet()
                 .stream()
                 .filter(entry -> entry.getValue().hashCode() != persistedEntities.get(entry.getKey()).hashCode());
 
+        // Save managedEntities with non-matching hashcodes
         Map<String, List<? extends Number>> metaObjects = FileManager.saveEntities(dirtyEntities.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         // Save Meta Objects to Map
@@ -132,11 +117,11 @@ class PersistenceManager {
      */
 
 
-    public MetaManager getMetaManager() {
+    MetaManager getMetaManager() {
         return metaManager;
     }
 
-    public Map<String, Pair<CommitAction, Object>> getToBeCommitted() {
+    Map<String, Pair<CommitAction, Object>> getToBeCommitted() {
         return toBeCommitted;
     }
 
@@ -144,11 +129,11 @@ class PersistenceManager {
         toBeCommitted = new HashMap<>();
     }
 
-    public Map<String, Object> getManagedEntities() {
+    Map<String, Object> getManagedEntities() {
         return managedEntities;
     }
 
-    public Map<String, Object> getPersistedEntities() {
+    Map<String, Object> getPersistedEntities() {
         return persistedEntities;
     }
 }
