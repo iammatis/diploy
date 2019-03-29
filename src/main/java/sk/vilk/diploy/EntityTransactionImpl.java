@@ -97,6 +97,8 @@ public class EntityTransactionImpl implements EntityTransaction {
 
         saveFiles(metaObjects, bytesToSave);
         persistenceManager.clearToBeCommitted();
+        // Delete undo log file after successful commit
+        deleteLogFile();
         isActive = false;
     }
 
@@ -202,6 +204,11 @@ public class EntityTransactionImpl implements EntityTransaction {
     private void setSavingTime() {
         SimpleDateFormat formatter = new SimpleDateFormat(LOG_FORMAT);
         savingTime = formatter.format(new Date());
+    }
+
+    private void deleteLogFile() {
+        File logFile = new File("undo-" + savingTime + ".bin");
+        logFile.delete();
     }
 
     /**
