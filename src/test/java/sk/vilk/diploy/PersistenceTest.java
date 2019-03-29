@@ -4,7 +4,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
 import javax.persistence.EntityManager;
 import java.io.File;
 import java.util.ArrayList;
@@ -17,7 +16,7 @@ public class PersistenceTest {
     private File metaFile;
 
     @BeforeTest
-    public void setupTest() {
+    public void setup() {
         factory = new EntityManagerFactoryImpl();
         em = factory.createEntityManager();
         mainFile = new File("diploy.bin");
@@ -27,11 +26,11 @@ public class PersistenceTest {
     }
 
     @AfterTest
-    public void destroyFiles() {
-        mainFile.delete();
-        metaFile.delete();
+    public void teardown() {
         em.close();
         factory.close();
+        mainFile.delete();
+        metaFile.delete();
     }
 
     @Test
