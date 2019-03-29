@@ -1,6 +1,8 @@
 package sk.vilk.diploy;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import sk.vilk.diploy.file.FileManager;
 import sk.vilk.diploy.file.MetaFileManager;
 import sk.vilk.diploy.meta.MetaManager;
@@ -13,11 +15,10 @@ import java.util.stream.Stream;
 
 class PersistenceManager {
 
-    // Map => Entity UUID - Serialized Entity byte[]
-    // Entities to be persisted after calling persist method
-    private Map<String, Object> toBePersisted = new HashMap<>();
-    // Entities to be removed after calling remove method
-    private Map<String, Object> toBeRemoved = new HashMap<>();
+    // UUID - Pair <PERSIST/REMOVE, Entity Object>
+    // Entities to be persisted and removed after calling commit method
+    private Map<String, Pair<CommitAction, Object>> toBeCommitted = new HashMap<>();
+    // UUID - Entity Object
     // Entities loaded from file (database) or persisted
     private Map<String, Object> entities = new HashMap<>();
     private Map<String, Object> untouched = new HashMap<>();
@@ -32,7 +33,7 @@ class PersistenceManager {
     void persist(Object entity) {
         String entityId = AnnotationManager.getIdValue(entity);
 
-        if (toBePersisted.containsKey(entityId) || entities.containsKey(entityId)) {
+        if (toBeCommitted.containsKey(entityId) || entities.containsKey(entityId)) {
             throw new EntityExistsException("Entity with id: " + entityId + " already exists!");
         }
 
@@ -50,7 +51,7 @@ class PersistenceManager {
             HashCode comparison seems to be faster than byte array comparison
          byte[] entityBytes = null;
          */
-        toBePersisted.put(entityId, entity);
+        toBeCommitted.put(entityId, new MutablePair<>(CommitAction.PERSIST, entity));
     }
 
     void remove(Object entity) {
@@ -61,7 +62,7 @@ class PersistenceManager {
             HashCode comparison seems to be faster than byte array comparison
          byte[] entityBytes = null;
          */
-        toBeRemoved.put(entityId, entity);
+        toBeCommitted.put(entityId, new MutablePair<>(CommitAction.REMOVE, entity));
     }
 
     <T> T find(Class<T> entityClass, Object primaryKey) {
@@ -129,35 +130,19 @@ class PersistenceManager {
         return metaManager;
     }
 
-    public Map<String, Object> getToBePersisted() {
-        return toBePersisted;
+    public Map<String, Pair<CommitAction, Object>> getToBeCommitted() {
+        return toBeCommitted;
     }
 
-    public void setToBePersisted(Map<String, Object> toBePersisted) {
-        this.toBePersisted = toBePersisted;
-    }
-
-    public Map<String, Object> getToBeRemoved() {
-        return toBeRemoved;
-    }
-
-    public void setToBeRemoved(Map<String, Object> toBeRemoved) {
-        this.toBeRemoved = toBeRemoved;
+    void clearToBeCommitted() {
+        toBeCommitted = new HashMap<>();
     }
 
     public Map<String, Object> getEntities() {
         return entities;
     }
 
-    public void addEntities(Map<String, Object> entities) {
-        for (Map.Entry<String, Object> entity: entities.entrySet()) {
-            this.entities.put(entity.getKey(), entity.getValue());
-            this.untouched.put(entity.getKey(), SerializationUtils.clone((Serializable) entity.getValue()));
-        }
-//        this.entities.putAll(entities);
-    }
-
-    public void setEntities(Map<String, Object> entities) {
-        this.entities = entities;
+    public Map<String, Object> getUntouched() {
+        return untouched;
     }
 }

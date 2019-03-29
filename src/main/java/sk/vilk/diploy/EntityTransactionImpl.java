@@ -1,12 +1,15 @@
 package sk.vilk.diploy;
 
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import sk.vilk.diploy.file.FileManager;
+import sk.vilk.diploy.file.History;
 import sk.vilk.diploy.file.MetaFileManager;
 import sk.vilk.diploy.meta.MetaObject;
 import javax.persistence.EntityTransaction;
+import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class EntityTransactionImpl implements EntityTransaction {
@@ -27,9 +30,7 @@ public class EntityTransactionImpl implements EntityTransaction {
     public void begin() {
         if (isActive()) throw new IllegalStateException("Transaction is already active!");
         this.isActive = true;
-        // TODO: Clean entity Maps ? toBePersisted and toBeRemoved
-        this.persistenceManager.setToBePersisted(new HashMap<>());
-        this.persistenceManager.setToBeRemoved(new HashMap<>());
+        persistenceManager.clearToBeCommitted();
     }
 
     /**
@@ -42,32 +43,51 @@ public class EntityTransactionImpl implements EntityTransaction {
     public void commit() {
         if (!isActive()) throw new IllegalStateException("No active transaction found!");
 
-        Map<String, MetaObject> metaObjects = new HashMap<>();
-        // Write to main file in bulk and get needed info and create MetaObjects
-        Map<String, List<? extends Number>> list = FileManager.saveEntities(this.persistenceManager.getToBePersisted());
+        // Create log file
+        History.createUndoLog(persistenceManager.getToBeCommitted());
 
-        // Save Meta Objects to Map
-        for (Map.Entry<String, List<? extends Number>> entry: list.entrySet()) {
-            long fileLength = entry.getValue().get(0).longValue();
-            int bytesLength = entry.getValue().get(1).intValue();
-            persistenceManager.getMetaManager().add(entry.getKey(), fileLength, bytesLength);
+        // Loop through toBeCommitted Map
+        Map<String, Object> entities = persistenceManager.getEntities();
+        Map<String, Object> untouched = persistenceManager.getUntouched();
+        Map<String, MetaObject> metaObjects = persistenceManager.getMetaManager().getMetaObjects();
+        // TODO: Don't hardcode!
+        String filename = "diploy.bin";
+        File file = new File(filename);
+        long fileLength = file.length();
+        ArrayList<byte[]> bytesToSave = new ArrayList<>();
+        for (Map.Entry<String, Pair<CommitAction, Object>> entry: persistenceManager.getToBeCommitted().entrySet()) {
+            String id = entry.getKey();
+            Pair<CommitAction, Object> pair = entry.getValue();
+            CommitAction action = pair.getLeft();
+            Object entity = pair.getRight();
+
+            switch (action) {
+                case PERSIST:
+                    // add to entities Map
+                    entities.put(id, entity);
+                    // TODO: Is clone needed ?
+                    untouched.put(id, SerializationUtils.clone((Serializable) entity));
+                    byte[] bytes = SerializationUtils.serialize((Serializable) entity);
+                    bytesToSave.add(bytes);
+                    int bytesLength = bytes.length;
+                    MetaObject metaObject = new MetaObject(id, fileLength, bytesLength);
+                    fileLength += bytesLength;
+                    metaObjects.put(id, metaObject);
+                    break;
+                case REMOVE:
+                    entities.remove(id);
+                    untouched.remove(id);
+                    metaObjects.remove(id);
+                    break;
+            }
         }
 
-        // Write metaObjects to Meta File
-        MetaFileManager.saveAllMetaObjects(new ArrayList(persistenceManager.getMetaManager().getMetaObjects().values()));
-        // Save Persisted entities to Map
-        persistenceManager.addEntities(this.persistenceManager.getToBePersisted());
-        this.persistenceManager.setToBePersisted(new HashMap<>());
+        // Save Meta Objects
+        MetaFileManager.saveAllMetaObjects(new ArrayList(metaObjects.values()));
+        // Save entity bytes to File
+        FileManager.saveEntities(bytesToSave);
 
         isActive = false;
-
-        // TODO: Lock access to both Maps ? Necessary or not ?
-
-        // TODO: Remove from Meta File
-        // TODO: Implement vacuum to clean up Main File
-
-        // TODO: Empty toBeRemoved Map and
-        // TODO: Remove entities of toBeRemoved Map from entities Map
     }
 
     /**
