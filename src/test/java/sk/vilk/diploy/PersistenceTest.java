@@ -125,4 +125,23 @@ public class PersistenceTest {
         Assert.assertFalse(em.contains(testObject));
     }
 
+    @Test
+    public void mergeTest() {
+        ArrayList<String> phoneNumbers = new ArrayList<>();
+        phoneNumbers.add("+421 123 456");
+        phoneNumbers.add("+421 789 100");
+        Date birthDay = new Date();
+        TestObject testObject = new TestObject("First", "Last", birthDay, phoneNumbers, 123_456.789);
+
+        em.getTransaction().begin();
+        em.persist(testObject);
+        em.getTransaction().commit();
+
+        em.detach(testObject);
+        Assert.assertFalse(em.contains(testObject));
+
+        em.merge(testObject);
+        Assert.assertTrue(em.contains(testObject));
+    }
+
 }

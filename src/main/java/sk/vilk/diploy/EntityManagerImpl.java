@@ -62,8 +62,8 @@ public class EntityManagerImpl implements EntityManager {
      */
     public <T> T merge(T entity) {
         verifyOpen();
-        //TODO: Implement merge
-        return null;
+        //TODO: Implement Exceptions
+        return persistenceManager.merge(entity);
     }
 
     /**

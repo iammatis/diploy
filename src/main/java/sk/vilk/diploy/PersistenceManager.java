@@ -104,6 +104,12 @@ class PersistenceManager {
     }
 
 
+    <T> T merge(T entity) {
+        String entityId = AnnotationManager.getIdValue(entity);
+        return (T) managedEntities.put(entityId, entity);
+    }
+
+
     void detach(Object entity) {
         String entityId = AnnotationManager.getIdValue(entity);
         managedEntities.remove(entityId);
