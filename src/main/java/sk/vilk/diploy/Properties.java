@@ -1,5 +1,9 @@
 package sk.vilk.diploy;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +12,7 @@ public class Properties {
 
     private Field idField;
     private List<Field> regularFields;
-    private List<Field> relationFields;
+    private List<Pair<Annotation, Field>> relationFields;
 
     public Properties() {
         regularFields = new ArrayList<>();
@@ -19,8 +23,8 @@ public class Properties {
         regularFields.add(field);
     }
 
-    public void addRelationField(Field field) {
-        relationFields.add(field);
+    public void addRelationField(Annotation annotation, Field field) {
+        relationFields.add(new ImmutablePair<>(annotation, field));
     }
 
     public Field getIdField() {
@@ -39,11 +43,11 @@ public class Properties {
         this.regularFields = regularFields;
     }
 
-    public List<Field> getRelationFields() {
+    public List<Pair<Annotation, Field>> getRelationFields() {
         return relationFields;
     }
 
-    public void setRelationFields(List<Field> relationFields) {
+    public void setRelationFields(List<Pair<Annotation, Field>> relationFields) {
         this.relationFields = relationFields;
     }
 

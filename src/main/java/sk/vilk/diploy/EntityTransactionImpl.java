@@ -67,6 +67,7 @@ public class EntityTransactionImpl implements EntityTransaction {
         Map<String, Object> managed = persistenceManager.getManagedEntities();
         Map<String, Object> persisted = persistenceManager.getPersistedEntities();
         Map<String, MetaObject> metaObjects = persistenceManager.getMetaManager().getMetaObjects();
+        EntityScanner entityScanner = persistenceManager.getEntityScanner();
         ArrayList<byte[]> bytesToSave = new ArrayList<>();
         long fileLength = getFileLength();
 
@@ -78,6 +79,12 @@ public class EntityTransactionImpl implements EntityTransaction {
 
             switch (action) {
                 case PERSIST:
+//                    System.out.println(entity);
+                    Object newInstance = InstanceManager.createNewInstance(entity, entityScanner.getProperties(entity));
+//                    System.out.println(newInstance);
+                    EntityWrapper entityWrapper = AnnotationManager.createEntityWrapper(entity, entityScanner.getProperties(entity));
+                    entityWrapper.setEntity(newInstance);
+                    System.out.println(entityWrapper);
                     byte[] bytes = SerializationUtils.serialize((Serializable) entity);
                     bytesToSave.add(bytes);
 

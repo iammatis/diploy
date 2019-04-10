@@ -1,9 +1,18 @@
 package sk.vilk.diploy;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.*;
 
 class AnnotationManager {
 
@@ -45,6 +54,43 @@ class AnnotationManager {
         } catch (Exception e) {
             logger.error("No id field found in entity class when setting id", e);
         }
+    }
+
+    static EntityWrapper createEntityWrapper(Object entity, Properties properties) {
+        EntityWrapper entityWrapper = new EntityWrapper();
+        for (Pair<Annotation, Field> pair : properties.getRelationFields()) {
+            Field field = pair.getRight();
+            Annotation annotation = pair.getLeft();
+            field.setAccessible(true);
+            try {
+                Object fieldValue = field.get(entity);
+
+                if (annotation instanceof OneToOne) {
+                    if (((OneToOne) annotation).mappedBy().equals("")) {
+                        Object idOfAnnotatedField = getIdValue(fieldValue);
+                        entityWrapper.addRelation(new Relation(annotation, field, idOfAnnotatedField));
+                    }
+                } else if (annotation instanceof OneToMany) {
+                    List<Object> listOfIds = new ArrayList<>();
+                    // TODO: Force cast to List, could be anything else!
+                    List list = (List) fieldValue;
+                    for (Object value : list) {
+                        listOfIds.add(getIdValue(value));
+                    }
+                    entityWrapper.addRelation(new Relation(annotation, field, listOfIds));
+                } else if (annotation instanceof ManyToOne) {
+//                    if (((ManyToOne) annotation).mappedBy().equals("")) {
+//                        Object idOfAnnotatedField = getIdValue(fieldValue);
+//                        entityWrapper.addRelation(new ImmutablePair<>(annotation, idOfAnnotatedField));
+//                    }
+                } else {
+//                    System.out.println("manytomany");
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return entityWrapper;
     }
 
 }

@@ -20,7 +20,6 @@ public class EntityScanner {
         Class<?> clazz = entity.getClass();
 
         if (!contains(clazz)) {
-            System.out.println("scanning");
             Field[] fields = clazz.getDeclaredFields();
             Properties properties = new Properties();
 
@@ -28,7 +27,9 @@ public class EntityScanner {
                 Annotation[] annotations = field.getDeclaredAnnotations();
 
                 if(isRelation(annotations)) {
-                    properties.addRelationField(field);
+                    // TODO: Danger zone -> Takes first element, might cause problems (more annotations ? no annotation ?)
+                    Annotation annotation = annotations[0];
+                    properties.addRelationField(annotation, field);
                 } else if (isId(annotations)) {
                     properties.setIdField(field);
                 } else {
@@ -39,7 +40,12 @@ public class EntityScanner {
         }
     }
 
+    public Properties getProperties(Object entity) {
+        return entityClasses.get(entity.getClass());
+    }
+
     private boolean isRelation(Annotation[] declaredAnnotations) {
+        // TODO: Should filter and return only relationship annotations not just true/false
         return Arrays.stream(declaredAnnotations).anyMatch(annotation -> relationClasses.contains(annotation.annotationType()));
     }
 
