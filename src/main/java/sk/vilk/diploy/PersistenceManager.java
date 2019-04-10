@@ -24,13 +24,17 @@ class PersistenceManager {
     private Map<String, Object> persistedEntities = new HashMap<>();
     // MetaManager
     private MetaManager metaManager;
+    private EntityScanner entityScanner;
 
     PersistenceManager() {
+        entityScanner = new EntityScanner();
         metaManager = new MetaManager();
         metaManager.initMeta();
     }
 
     void persist(Object entity) {
+        entityScanner.scanClass(entity);
+
         String entityId = AnnotationManager.getIdValue(entity);
 
         if (toBeCommitted.containsKey(entityId) || managedEntities.containsKey(entityId)) {
@@ -141,5 +145,9 @@ class PersistenceManager {
 
     Map<String, Object> getPersistedEntities() {
         return persistedEntities;
+    }
+
+    public EntityScanner getEntityScanner() {
+        return entityScanner;
     }
 }
