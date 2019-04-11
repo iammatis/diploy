@@ -5,6 +5,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class wraps the entity and adds its relations and current lockMode
+ */
 public class EntityWrapper implements Serializable {
 
     private Object entity;

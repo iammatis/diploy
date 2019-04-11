@@ -1,12 +1,9 @@
 package sk.vilk.diploy;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -68,7 +65,7 @@ class AnnotationManager {
                 if (annotation instanceof OneToOne) {
                     if (((OneToOne) annotation).mappedBy().equals("")) {
                         Object idOfAnnotatedField = getIdValue(fieldValue);
-                        entityWrapper.addRelation(new Relation(annotation, field, idOfAnnotatedField));
+                        entityWrapper.addRelation(new Relation(annotation, field.getName(), idOfAnnotatedField));
                     }
                 } else if (annotation instanceof OneToMany) {
                     List<Object> listOfIds = new ArrayList<>();
@@ -77,7 +74,7 @@ class AnnotationManager {
                     for (Object value : list) {
                         listOfIds.add(getIdValue(value));
                     }
-                    entityWrapper.addRelation(new Relation(annotation, field, listOfIds));
+                    entityWrapper.addRelation(new Relation(annotation, field.getName(), listOfIds));
                 } else if (annotation instanceof ManyToOne) {
 //                    if (((ManyToOne) annotation).mappedBy().equals("")) {
 //                        Object idOfAnnotatedField = getIdValue(fieldValue);

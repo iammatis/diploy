@@ -7,16 +7,20 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Class scans entities and keeps their relationships, lockMode and entity itself
+ * Scans new Entity and its fields when not found int entityClasses Map
+ */
 public class EntityScanner {
 
     private HashMap<Class, Properties> entityClasses;
     private final List<Class<?>> relationClasses = List.of(OneToOne.class, OneToMany.class, ManyToOne.class, ManyToMany.class);
 
-    public EntityScanner() {
+    EntityScanner() {
         entityClasses = new HashMap<>();
     }
 
-    public void scanClass(Object entity) {
+    void scanClass(Object entity) {
         Class<?> clazz = entity.getClass();
 
         if (!contains(clazz)) {
@@ -40,7 +44,7 @@ public class EntityScanner {
         }
     }
 
-    public Properties getProperties(Object entity) {
+    Properties getProperties(Object entity) {
         return entityClasses.get(entity.getClass());
     }
 
@@ -53,15 +57,7 @@ public class EntityScanner {
         return Arrays.stream(declaredAnnotations).anyMatch(annotation ->  annotation.annotationType() == Id.class);
     }
 
-    public boolean contains(Class clazz) {
+    private boolean contains(Class clazz) {
         return entityClasses.containsKey(clazz);
-    }
-
-    public HashMap<Class, Properties> getEntityClasses() {
-        return entityClasses;
-    }
-
-    public void setEntityClasses(HashMap<Class, Properties> entityClasses) {
-        this.entityClasses = entityClasses;
     }
 }

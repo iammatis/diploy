@@ -8,6 +8,7 @@ import sk.vilk.diploy.file.MetaFileManager;
 import sk.vilk.diploy.meta.MetaManager;
 import sk.vilk.diploy.meta.MetaObject;
 import javax.persistence.EntityExistsException;
+import javax.persistence.LockModeType;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,10 +19,10 @@ class PersistenceManager {
     // UUID - Pair <PERSIST/REMOVE, Entity Object>
     // Entities to be persisted and removed after calling commit method
     private Map<String, Pair<CommitAction, Object>> toBeCommitted = new HashMap<>();
-    // UUID - Entity Object
-    // Entities loaded from file (database) or persisted
+    // Entities managed by EntityManager
     private Map<String, Object> managedEntities = new HashMap<>();
-    private Map<String, Object> persistedEntities = new HashMap<>();
+    // Entities in database
+    private Map<String, EntityWrapper> persistedEntities = new HashMap<>();
     // MetaManager
     private MetaManager metaManager;
     private EntityScanner entityScanner;
@@ -70,13 +71,13 @@ class PersistenceManager {
             // TODO: If byte[] is null => error occurred
             byte[] entityBytes = FileManager.readEntity(metaObject);
             // Deserialize byte array
-            Object entityObject = SerializationUtils.deserialize(entityBytes);
+            EntityWrapper entityWrapper = SerializationUtils.deserialize(entityBytes);
             // Java is pass-by-value => therefore we need to clone the entity's object
-            Object clonedEntity = SerializationUtils.clone((Serializable) entityObject);
+            Object clonedEntity = SerializationUtils.clone((Serializable) entityWrapper.getEntity());
             // And save to entity Map
-            managedEntities.put((String) primaryKey, entityObject);
-            persistedEntities.put((String) primaryKey, clonedEntity);
-            return (T) entityObject;
+            managedEntities.put((String) primaryKey, clonedEntity);
+            persistedEntities.put((String) primaryKey, entityWrapper);
+            return (T) clonedEntity;
         }
         return (T) entity;
     }
@@ -143,11 +144,11 @@ class PersistenceManager {
         return managedEntities;
     }
 
-    Map<String, Object> getPersistedEntities() {
+    Map<String, EntityWrapper> getPersistedEntities() {
         return persistedEntities;
     }
 
-    public EntityScanner getEntityScanner() {
+    EntityScanner getEntityScanner() {
         return entityScanner;
     }
 }

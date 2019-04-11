@@ -65,7 +65,7 @@ public class EntityTransactionImpl implements EntityTransaction {
 
         // Loop through toBeCommitted Map
         Map<String, Object> managed = persistenceManager.getManagedEntities();
-        Map<String, Object> persisted = persistenceManager.getPersistedEntities();
+        Map<String, EntityWrapper> persisted = persistenceManager.getPersistedEntities();
         Map<String, MetaObject> metaObjects = persistenceManager.getMetaManager().getMetaObjects();
         EntityScanner entityScanner = persistenceManager.getEntityScanner();
         ArrayList<byte[]> bytesToSave = new ArrayList<>();
@@ -84,13 +84,16 @@ public class EntityTransactionImpl implements EntityTransaction {
 //                    System.out.println(newInstance);
                     EntityWrapper entityWrapper = AnnotationManager.createEntityWrapper(entity, entityScanner.getProperties(entity));
                     entityWrapper.setEntity(newInstance);
-                    System.out.println(entityWrapper);
-                    byte[] bytes = SerializationUtils.serialize((Serializable) entity);
+//                    System.out.println(entityWrapper);
+                    byte[] bytes = SerializationUtils.serialize(entityWrapper);
                     bytesToSave.add(bytes);
 
                     int bytesLength = bytes.length;
                     MetaObject metaObject = createMetaObject(id, fileLength, bytesLength);
-                    addEntityToMaps(managed, persisted, metaObjects, id, entity, metaObject);
+
+                    managed.put(id, entity);
+                    metaObjects.put(id, metaObject);
+                    persisted.put(id, entityWrapper);
 
                     fileLength += bytesLength;
                     break;
@@ -122,8 +125,8 @@ public class EntityTransactionImpl implements EntityTransaction {
 
         List<MutablePair<CommitAction, String>> listOfPairs = History.readUndoLog(savingTime);
         Map<String, MetaObject> metaObjects = persistenceManager.getMetaManager().getMetaObjects();
-        Map<String, Object> entities = persistenceManager.getManagedEntities();
-        Map<String, Object> untouched = persistenceManager.getPersistedEntities();
+        Map<String, Object> managedEntities = persistenceManager.getManagedEntities();
+//        Map<String, EntityWrapper> untouched = persistenceManager.getPersistedEntities();
         Map<String, Pair<CommitAction, Object>> toBeCommitted = persistenceManager.getToBeCommitted();
 
         ArrayList<byte[]> bytesToSave = new ArrayList<>();
@@ -137,8 +140,8 @@ public class EntityTransactionImpl implements EntityTransaction {
                     // Reverse procedure of commit REMOVE case
                     case PERSIST:
                         metaObjects.remove(id);
-                        entities.remove(id);
-                        untouched.remove(id);
+                        managedEntities.remove(id);
+//                        untouched.remove(id);
                         break;
                     // Reverse procedure of commit PERSIST case
                     case REMOVE:
@@ -148,7 +151,9 @@ public class EntityTransactionImpl implements EntityTransaction {
 
                         int bytesLength = bytes.length;
                         MetaObject metaObject = createMetaObject(id, fileLength, bytesLength);
-                        addEntityToMaps(entities, untouched, metaObjects, id, entity, metaObject);
+                        managedEntities.put(id, entity);
+                        metaObjects.put(id, metaObject);
+                        // TODO: put to persistedEntities Map
 
                         fileLength += bytesLength;
                         break;
@@ -227,13 +232,6 @@ public class EntityTransactionImpl implements EntityTransaction {
         String filename = "diploy.bin";
         File file = new File(filename);
         return file.length();
-    }
-
-    private void addEntityToMaps(Map<String, Object> entities, Map<String, Object> untouched, Map<String, MetaObject> metaObjects, String id, Object entity, MetaObject metaObject) {
-        entities.put(id, entity);
-        // TODO: Is clone needed ?
-        untouched.put(id, SerializationUtils.clone((Serializable) entity));
-        metaObjects.put(id, metaObject);
     }
 
     private MetaObject createMetaObject(String id, long fileLength, int bytesLength) {

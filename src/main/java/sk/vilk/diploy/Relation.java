@@ -1,16 +1,17 @@
 package sk.vilk.diploy;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
-public class Relation {
+public class Relation implements Serializable {
 
     private Annotation annotation;
     // TODO: Save the whole field class or just name or sth?
-    private Field field;
+    private String field;
     private Object foreign;
 
-    public Relation(Annotation annotation, Field field, Object foreign) {
+    public Relation(Annotation annotation, String field, Object foreign) {
         this.annotation = annotation;
         this.field = field;
         this.foreign = foreign;
@@ -24,11 +25,11 @@ public class Relation {
         this.annotation = annotation;
     }
 
-    public Field getField() {
+    public String getField() {
         return field;
     }
 
-    public void setField(Field field) {
+    public void setField(String field) {
         this.field = field;
     }
 
