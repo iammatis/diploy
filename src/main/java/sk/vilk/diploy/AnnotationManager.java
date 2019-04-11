@@ -1,6 +1,5 @@
 package sk.vilk.diploy;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,42 +14,15 @@ class AnnotationManager {
 
     private static final Logger logger = LoggerFactory.getLogger(AnnotationManager.class);
 
-    static String getIdValue(Object object) {
-        try {
-            String attributeName = getIdName(object);
-
-            Object idValue = FieldUtils.readDeclaredField(object, attributeName, true);
-            return idValue != null ? idValue.toString() : null;
-        } catch (IllegalAccessException e) {
-            logger.error("Can't access id field in given entity class when getting id", e);
-        } catch (Exception e) {
-            logger.error("No id field found in entity class when getting id", e);
-        }
-        return null;
+    static String getIdValue(Properties classProperties, Object entity) {
+        Field idField = classProperties.getIdField();
+        Object idValue = getFieldValue(idField.getName(), entity);
+        return idValue != null ? idValue.toString() : null;
     }
 
-    private static String getIdName(Object object) throws Exception {
-        Field[] fields = FieldUtils.getFieldsWithAnnotation(object.getClass(), javax.persistence.Id.class);
-
-        // fields need to consist of exactly one element => There can't be more than one Id.class in Entity class
-        if (fields.length != 1) {
-            // TODO: Implement custom exception ?
-            throw new Exception("No id field found!");
-        }
-
-        return fields[0].getName();
-    }
-
-    static void setIdValue(Object object, Object id) {
-        try {
-            String attributeName = getIdName(object);
-
-            FieldUtils.writeDeclaredField(object, attributeName, id, true);
-        } catch (IllegalAccessException e) {
-            logger.error("Can't access id field in given entity class when setting id", e);
-        } catch (Exception e) {
-            logger.error("No id field found in entity class when setting id", e);
-        }
+    static void setIdValue(Properties classProperties, Object entity, Object id) {
+        Field idField = classProperties.getIdField();
+        setFieldValue(idField.getName(), entity, id);
     }
 
     static EntityWrapper createEntityWrapper(Object entity, Properties properties) {
@@ -64,7 +36,7 @@ class AnnotationManager {
 
                 if (annotation instanceof OneToOne) {
                     if (((OneToOne) annotation).mappedBy().equals("")) {
-                        Object idOfAnnotatedField = getIdValue(fieldValue);
+                        Object idOfAnnotatedField = getIdValue(properties, fieldValue);
                         entityWrapper.addRelation(new Relation(annotation, field.getName(), idOfAnnotatedField));
                     }
                 } else if (annotation instanceof OneToMany) {
@@ -72,7 +44,7 @@ class AnnotationManager {
                     // TODO: Force cast to List, could be anything else!
                     List list = (List) fieldValue;
                     for (Object value : list) {
-                        listOfIds.add(getIdValue(value));
+                        listOfIds.add(getIdValue(properties, value));
                     }
                     entityWrapper.addRelation(new Relation(annotation, field.getName(), listOfIds));
                 } else if (annotation instanceof ManyToOne) {
@@ -90,15 +62,28 @@ class AnnotationManager {
         return entityWrapper;
     }
 
+    static Object getFieldValue(String fieldName, Object entity) {
+        try {
+            Field field = entity.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.get(entity);
+        } catch (NoSuchFieldException e) {
+            logger.error("There is no field '"+ fieldName +"' in entity class '" + entity.getClass() + "' when getting field", e);
+        } catch (IllegalAccessException e) {
+            logger.error("Can't access field '"+ fieldName +"' in entity class '" + entity.getClass() + "' when getting field", e);
+        }
+        return null;
+    }
+
     static void setFieldValue(String fieldName, Object entity, Object foreignEntity) {
         try {
             Field field = entity.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
             field.set(entity, foreignEntity);
         } catch (NoSuchFieldException e) {
-            e.printStackTrace();
+            logger.error("There is no field '"+ fieldName +"' in entity class '" + entity.getClass() + "' when setting field", e);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            logger.error("Can't access field '"+ fieldName +"' in entity class '" + entity.getClass() + "' when setting field", e);
         }
     }
 }

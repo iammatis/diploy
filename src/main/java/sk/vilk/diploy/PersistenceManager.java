@@ -39,7 +39,7 @@ class PersistenceManager {
     void persist(Object entity) {
         entityScanner.scanClass(entity);
 
-        String entityId = AnnotationManager.getIdValue(entity);
+        Object entityId = AnnotationManager.getIdValue(entityScanner.getProperties(entity), entity);
 
         if (toBeCommitted.containsKey(entityId) || managedEntities.containsKey(entityId)) {
             throw new EntityExistsException("Entity with id: " + entityId + " already exists!");
@@ -50,15 +50,15 @@ class PersistenceManager {
          */
 
         // TODO: Convert to String or use UUID model ?
-        entityId = UUID.randomUUID().toString();
+        String newId = UUID.randomUUID().toString();
         // TODO: Should be id set now or at commit() ?
-        AnnotationManager.setIdValue(entity, entityId);
+        AnnotationManager.setIdValue(entityScanner.getProperties(entity), entity, newId);
 
-        toBeCommitted.put(entityId, new MutablePair<>(CommitAction.PERSIST, entity));
+        toBeCommitted.put(newId, new MutablePair<>(CommitAction.PERSIST, entity));
     }
 
     void remove(Object entity) {
-        String entityId = AnnotationManager.getIdValue(entity);
+        String entityId = AnnotationManager.getIdValue(entityScanner.getProperties(entity), entity);
         toBeCommitted.put(entityId, new MutablePair<>(CommitAction.REMOVE, entity));
     }
 
@@ -137,19 +137,19 @@ class PersistenceManager {
     }
 
     boolean contains(Object entity) {
-        String entityId = AnnotationManager.getIdValue(entity);
+        String entityId = AnnotationManager.getIdValue(entityScanner.getProperties(entity), entity);
         return managedEntities.containsKey(entityId);
     }
 
 
     <T> T merge(T entity) {
-        String entityId = AnnotationManager.getIdValue(entity);
+        String entityId = AnnotationManager.getIdValue(entityScanner.getProperties(entity), entity);
         return (T) managedEntities.put(entityId, entity);
     }
 
 
     void detach(Object entity) {
-        String entityId = AnnotationManager.getIdValue(entity);
+        String entityId = AnnotationManager.getIdValue(entityScanner.getProperties(entity), entity);
         managedEntities.remove(entityId);
     }
 
