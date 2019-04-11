@@ -9,7 +9,10 @@ import sk.vilk.diploy.meta.MetaManager;
 import sk.vilk.diploy.meta.MetaObject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.LockModeType;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -77,9 +80,39 @@ class PersistenceManager {
             // And save to entity Map
             managedEntities.put((String) primaryKey, clonedEntity);
             persistedEntities.put((String) primaryKey, entityWrapper);
+
+            // Check if wrapper has any relations and load them
+            if (!entityWrapper.getRelations().isEmpty()) {
+                for (Relation relation : entityWrapper.getRelations()) {
+                    loadRelation(relation, clonedEntity);
+                }
+            }
+
             return (T) clonedEntity;
         }
         return (T) entity;
+    }
+
+    private void loadRelation(Relation relation, Object clonedEntity) {
+        Annotation annotation = relation.getAnnotation();
+        if (annotation instanceof OneToOne) {
+            Object foreignId = relation.getForeign();
+            // TODO: Could loop forever when looping relations in find()!!!
+            Object foreignEntity = find(null, foreignId);
+
+            String fieldName = relation.getField();
+            AnnotationManager.setFieldValue(fieldName, clonedEntity, foreignEntity);
+        } else if (annotation instanceof OneToMany) {
+            List foreignIds = (List) relation.getForeign();
+            List<Object> foreignEntitiesList = new ArrayList<>();
+
+            for (Object foreignId : foreignIds) {
+                Object foreignEntity = find(null, foreignId);
+                foreignEntitiesList.add(foreignEntity);
+            }
+            String fieldName = relation.getField();
+            AnnotationManager.setFieldValue(fieldName, clonedEntity, foreignEntitiesList);
+        }
     }
 
     void flush() {

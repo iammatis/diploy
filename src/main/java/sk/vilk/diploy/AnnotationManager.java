@@ -90,4 +90,15 @@ class AnnotationManager {
         return entityWrapper;
     }
 
+    static void setFieldValue(String fieldName, Object entity, Object foreignEntity) {
+        try {
+            Field field = entity.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(entity, foreignEntity);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
 }
