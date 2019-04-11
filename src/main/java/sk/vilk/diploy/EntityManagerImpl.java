@@ -577,9 +577,12 @@ public class EntityManagerImpl implements EntityManager {
     public LockModeType getLockMode(Object entity) {
         verifyOpen();
         verifyTransaction("getLockMode");
-        //TODO: Implement getLockMode
-        return null;
-//        return null;
+
+        if (!persistenceManager.contains(entity)) {
+            throw new IllegalArgumentException("Instance is not managed by EM!");
+        }
+
+        return persistenceManager.getLockMode(entity);
     }
 
     /**

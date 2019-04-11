@@ -153,6 +153,11 @@ class PersistenceManager {
         managedEntities.remove(entityId);
     }
 
+    LockModeType getLockMode(Object entity) {
+        Object id = AnnotationManager.getIdValue(entityScanner.getProperties(entity), entity);
+        return persistedEntities.get(id).getLockModeType();
+    }
+
 
     /*
 
