@@ -3,6 +3,8 @@ package sk.vilk.diploy;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -47,12 +49,7 @@ class AnnotationManager {
                         listOfIds.add(getIdValue(properties, value));
                     }
                     entityWrapper.addRelation(new Relation(annotation, field.getName(), listOfIds));
-                } else if (annotation instanceof ManyToOne) {
-//                    if (((ManyToOne) annotation).mappedBy().equals("")) {
-//                        Object idOfAnnotatedField = getIdValue(fieldValue);
-//                        entityWrapper.addRelation(new ImmutablePair<>(annotation, idOfAnnotatedField));
-//                    }
-                } else {
+                } else if (annotation instanceof ManyToMany) {
 //                    System.out.println("manytomany");
                 }
             } catch (IllegalAccessException e) {

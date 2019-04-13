@@ -106,9 +106,15 @@ class PersistenceManager {
             List foreignIds = (List) relation.getForeign();
             List<Object> foreignEntitiesList = new ArrayList<>();
 
+            String mappedBy = ((OneToMany) annotation).mappedBy();
+
             for (Object foreignId : foreignIds) {
                 Object foreignEntity = find(null, foreignId);
                 foreignEntitiesList.add(foreignEntity);
+
+                if (!mappedBy.equals("")) {
+                    AnnotationManager.setFieldValue(mappedBy, foreignEntity, clonedEntity);
+                }
             }
             String fieldName = relation.getField();
             AnnotationManager.setFieldValue(fieldName, clonedEntity, foreignEntitiesList);
