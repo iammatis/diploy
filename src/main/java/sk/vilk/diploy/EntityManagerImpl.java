@@ -6,10 +6,8 @@ import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.metamodel.Metamodel;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class EntityManagerImpl implements EntityManager {
 
@@ -43,7 +41,8 @@ public class EntityManagerImpl implements EntityManager {
      */
     public void persist(Object entity) {
         verifyOpen();
-        // TODO: Exceptions
+        verifyTransaction("persist");
+        // TODO: IllegalArgumentException
         this.persistenceManager.persist(entity);
     }
 
@@ -62,7 +61,8 @@ public class EntityManagerImpl implements EntityManager {
      */
     public <T> T merge(T entity) {
         verifyOpen();
-        //TODO: Implement Exceptions
+        verifyTransaction("merge");
+        //TODO: IllegalArgumentException
         return persistenceManager.merge(entity);
     }
 
@@ -79,7 +79,8 @@ public class EntityManagerImpl implements EntityManager {
      */
     public void remove(Object entity) {
         verifyOpen();
-        //TODO: Exceptions
+        verifyTransaction("remove");
+        //TODO: IllegalArgumentException
         this.persistenceManager.remove(entity);
     }
 
@@ -176,6 +177,7 @@ public class EntityManagerImpl implements EntityManager {
      */
     public <T> T find(Class<T> entityClass, Object primaryKey, LockModeType lockMode) {
         verifyOpen();
+        verifyTransaction("find");
         //TODO: Implement find with lockMode
         return null;
     }
@@ -231,6 +233,7 @@ public class EntityManagerImpl implements EntityManager {
      */
     public <T> T find(Class<T> entityClass, Object primaryKey, LockModeType lockMode, Map<String, Object> properties) {
         verifyOpen();
+        verifyTransaction("find");
         //TODO: Implement find with properties and lockMode
         return null;
     }
@@ -273,6 +276,7 @@ public class EntityManagerImpl implements EntityManager {
      */
     public void flush() {
         verifyOpen();
+        verifyTransaction("flush");
         persistenceManager.flush();
     }
 
@@ -334,6 +338,7 @@ public class EntityManagerImpl implements EntityManager {
      */
     public void lock(Object entity, LockModeType lockMode) {
         verifyOpen();
+        verifyTransaction("lock");
         //TODO: Implement lock
     }
 
@@ -382,6 +387,7 @@ public class EntityManagerImpl implements EntityManager {
      */
     public void lock(Object entity, LockModeType lockMode, Map<String, Object> properties) {
         verifyOpen();
+        verifyTransaction("lock");
         //TODO: Implement lock
     }
 
@@ -401,6 +407,7 @@ public class EntityManagerImpl implements EntityManager {
      */
     public void refresh(Object entity) {
         verifyOpen();
+        verifyTransaction("refresh");
         //TODO: Implement refresh
     }
 
@@ -425,6 +432,7 @@ public class EntityManagerImpl implements EntityManager {
      */
     public void refresh(Object entity, Map<String, Object> properties) {
         verifyOpen();
+        verifyTransaction("refresh");
         //TODO: Implement refresh
     }
 
@@ -463,6 +471,7 @@ public class EntityManagerImpl implements EntityManager {
      */
     public void refresh(Object entity, LockModeType lockMode) {
         verifyOpen();
+        verifyTransaction("refresh");
         //TODO: Implement refresh
     }
 
@@ -509,6 +518,7 @@ public class EntityManagerImpl implements EntityManager {
      */
     public void refresh(Object entity, LockModeType lockMode, Map<String, Object> properties) {
         verifyOpen();
+        verifyTransaction("refresh");
         //TODO: Implement refresh
     }
 
@@ -566,8 +576,13 @@ public class EntityManagerImpl implements EntityManager {
      */
     public LockModeType getLockMode(Object entity) {
         verifyOpen();
-        //TODO: Implement getLockMode
-        return null;
+        verifyTransaction("getLockMode");
+
+        if (!persistenceManager.contains(entity)) {
+            throw new IllegalArgumentException("Instance is not managed by EM!");
+        }
+
+        return persistenceManager.getLockMode(entity);
     }
 
     /**
@@ -861,6 +876,7 @@ public class EntityManagerImpl implements EntityManager {
      */
     public void joinTransaction() {
         verifyOpen();
+        verifyTransaction("joinTransaction");
         //TODO: Implement joinTransaction
     }
 
@@ -1058,6 +1074,12 @@ public class EntityManagerImpl implements EntityManager {
     public void verifyOpen() {
         if (!isOpen()) {
             throw new IllegalStateException("Entity Manager is already closed!");
+        }
+    }
+
+    private void verifyTransaction(String methodName) {
+        if (currentTransaction == null) {
+            throw new TransactionRequiredException("Method '" + methodName + "' must be called in a transaction!");
         }
     }
 

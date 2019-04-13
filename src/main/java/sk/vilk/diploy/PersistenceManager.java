@@ -8,7 +8,11 @@ import sk.vilk.diploy.file.MetaFileManager;
 import sk.vilk.diploy.meta.MetaManager;
 import sk.vilk.diploy.meta.MetaObject;
 import javax.persistence.EntityExistsException;
+import javax.persistence.LockModeType;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,20 +22,24 @@ class PersistenceManager {
     // UUID - Pair <PERSIST/REMOVE, Entity Object>
     // Entities to be persisted and removed after calling commit method
     private Map<String, Pair<CommitAction, Object>> toBeCommitted = new HashMap<>();
-    // UUID - Entity Object
-    // Entities loaded from file (database) or persisted
+    // Entities managed by EntityManager
     private Map<String, Object> managedEntities = new HashMap<>();
-    private Map<String, Object> persistedEntities = new HashMap<>();
+    // Entities in database
+    private Map<String, EntityWrapper> persistedEntities = new HashMap<>();
     // MetaManager
     private MetaManager metaManager;
+    private EntityScanner entityScanner;
 
     PersistenceManager() {
+        entityScanner = new EntityScanner();
         metaManager = new MetaManager();
         metaManager.initMeta();
     }
 
     void persist(Object entity) {
-        String entityId = AnnotationManager.getIdValue(entity);
+        entityScanner.scanClass(entity);
+
+        Object entityId = AnnotationManager.getIdValue(entityScanner.getProperties(entity), entity);
 
         if (toBeCommitted.containsKey(entityId) || managedEntities.containsKey(entityId)) {
             throw new EntityExistsException("Entity with id: " + entityId + " already exists!");
@@ -42,15 +50,15 @@ class PersistenceManager {
          */
 
         // TODO: Convert to String or use UUID model ?
-        entityId = UUID.randomUUID().toString();
+        String newId = UUID.randomUUID().toString();
         // TODO: Should be id set now or at commit() ?
-        AnnotationManager.setIdValue(entity, entityId);
+        AnnotationManager.setIdValue(entityScanner.getProperties(entity), entity, newId);
 
-        toBeCommitted.put(entityId, new MutablePair<>(CommitAction.PERSIST, entity));
+        toBeCommitted.put(newId, new MutablePair<>(CommitAction.PERSIST, entity));
     }
 
     void remove(Object entity) {
-        String entityId = AnnotationManager.getIdValue(entity);
+        String entityId = AnnotationManager.getIdValue(entityScanner.getProperties(entity), entity);
         toBeCommitted.put(entityId, new MutablePair<>(CommitAction.REMOVE, entity));
     }
 
@@ -66,15 +74,51 @@ class PersistenceManager {
             // TODO: If byte[] is null => error occurred
             byte[] entityBytes = FileManager.readEntity(metaObject);
             // Deserialize byte array
-            Object entityObject = SerializationUtils.deserialize(entityBytes);
+            EntityWrapper entityWrapper = SerializationUtils.deserialize(entityBytes);
             // Java is pass-by-value => therefore we need to clone the entity's object
-            Object clonedEntity = SerializationUtils.clone((Serializable) entityObject);
+            Object clonedEntity = SerializationUtils.clone((Serializable) entityWrapper.getEntity());
             // And save to entity Map
-            managedEntities.put((String) primaryKey, entityObject);
-            persistedEntities.put((String) primaryKey, clonedEntity);
-            return (T) entityObject;
+            managedEntities.put((String) primaryKey, clonedEntity);
+            persistedEntities.put((String) primaryKey, entityWrapper);
+
+            // Check if wrapper has any relations and load them
+            if (!entityWrapper.getRelations().isEmpty()) {
+                for (Relation relation : entityWrapper.getRelations()) {
+                    loadRelation(relation, clonedEntity);
+                }
+            }
+
+            return (T) clonedEntity;
         }
         return (T) entity;
+    }
+
+    private void loadRelation(Relation relation, Object clonedEntity) {
+        Annotation annotation = relation.getAnnotation();
+        if (annotation instanceof OneToOne) {
+            Object foreignId = relation.getForeign();
+            // TODO: Could loop forever when looping relations in find()!!!
+            Object foreignEntity = find(null, foreignId);
+
+            String fieldName = relation.getField();
+            AnnotationManager.setFieldValue(fieldName, clonedEntity, foreignEntity);
+        } else if (annotation instanceof OneToMany) {
+            List foreignIds = (List) relation.getForeign();
+            List<Object> foreignEntitiesList = new ArrayList<>();
+
+            String mappedBy = ((OneToMany) annotation).mappedBy();
+
+            for (Object foreignId : foreignIds) {
+                Object foreignEntity = find(null, foreignId);
+                foreignEntitiesList.add(foreignEntity);
+
+                if (!mappedBy.equals("")) {
+                    AnnotationManager.setFieldValue(mappedBy, foreignEntity, clonedEntity);
+                }
+            }
+            String fieldName = relation.getField();
+            AnnotationManager.setFieldValue(fieldName, clonedEntity, foreignEntitiesList);
+        }
     }
 
     void flush() {
@@ -99,20 +143,25 @@ class PersistenceManager {
     }
 
     boolean contains(Object entity) {
-        String entityId = AnnotationManager.getIdValue(entity);
+        String entityId = AnnotationManager.getIdValue(entityScanner.getProperties(entity), entity);
         return managedEntities.containsKey(entityId);
     }
 
 
     <T> T merge(T entity) {
-        String entityId = AnnotationManager.getIdValue(entity);
+        String entityId = AnnotationManager.getIdValue(entityScanner.getProperties(entity), entity);
         return (T) managedEntities.put(entityId, entity);
     }
 
 
     void detach(Object entity) {
-        String entityId = AnnotationManager.getIdValue(entity);
+        String entityId = AnnotationManager.getIdValue(entityScanner.getProperties(entity), entity);
         managedEntities.remove(entityId);
+    }
+
+    LockModeType getLockMode(Object entity) {
+        Object id = AnnotationManager.getIdValue(entityScanner.getProperties(entity), entity);
+        return persistedEntities.get(id).getLockModeType();
     }
 
 
@@ -139,7 +188,11 @@ class PersistenceManager {
         return managedEntities;
     }
 
-    Map<String, Object> getPersistedEntities() {
+    Map<String, EntityWrapper> getPersistedEntities() {
         return persistedEntities;
+    }
+
+    EntityScanner getEntityScanner() {
+        return entityScanner;
     }
 }
