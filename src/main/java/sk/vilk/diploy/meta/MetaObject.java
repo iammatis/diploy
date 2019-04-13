@@ -1,24 +1,27 @@
-package sk.vilk.diploy.model;
+package sk.vilk.diploy.meta;
 
 import java.io.Serializable;
 
 public class MetaObject implements Serializable {
 
-    private Object id;
+    // UUID of the entity
+    private String id;
+    // Position in file main file where the entity bytes start
     private long from;
+    // Length of entity's byte array
     private int length;
 
-    public MetaObject(Object id, long from, int length) {
+    public MetaObject(String id, long from, int length) {
         this.id = id;
         this.from = from;
         this.length = length;
     }
 
-    public Object getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Object id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -41,7 +44,7 @@ public class MetaObject implements Serializable {
     @Override
     public String toString() {
         return "MetaObject{" +
-                ", id=" + id +
+                "id='" + id + '\'' +
                 ", from=" + from +
                 ", length=" + length +
                 '}';
