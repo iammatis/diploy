@@ -1,2 +1,4 @@
 target/
-diploy_example/
+example/
+.idea
+*.bin
