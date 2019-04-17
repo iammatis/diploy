@@ -3,21 +3,20 @@ package sk.vilk.diploy;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import sk.vilk.diploy.collections.LazyList;
 import sk.vilk.diploy.file.FileManager;
 import sk.vilk.diploy.file.MetaFileManager;
 import sk.vilk.diploy.meta.MetaManager;
 import sk.vilk.diploy.meta.MetaObject;
-import javax.persistence.EntityExistsException;
-import javax.persistence.LockModeType;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-class PersistenceManager {
+public class PersistenceManager {
 
     // UUID - Pair <PERSIST/REMOVE, Entity Object>
     // Entities to be persisted and removed after calling commit method
@@ -84,7 +83,7 @@ class PersistenceManager {
             // Check if wrapper has any relations and load them
             if (!entityWrapper.getRelations().isEmpty()) {
                 for (Relation relation : entityWrapper.getRelations()) {
-                    loadRelation(relation, clonedEntity);
+                    loadRelation(relation, primaryKey, clonedEntity);
                 }
             }
 
@@ -93,31 +92,37 @@ class PersistenceManager {
         return (T) entity;
     }
 
-    private void loadRelation(Relation relation, Object clonedEntity) {
+    // findAll - used in lazy collection after method call
+    public List findAll(String mappedBy, Object entityId, List<String> foreignIds) {
+        ArrayList<Object> relations = new ArrayList<>();
+        Object relatedEntity = managedEntities.get(entityId);
+        for (String foreignId: foreignIds) {
+            Object entity = find(null, foreignId);
+            relations.add(entity);
+
+            // Bidirectional relation aka mappedBy
+            AnnotationManager.setFieldValue(mappedBy, entity, relatedEntity);
+        }
+        return relations;
+    }
+
+    private void loadRelation(Relation relation, Object primaryKey, Object clonedEntity) {
         Annotation annotation = relation.getAnnotation();
+        System.out.println(clonedEntity);
         if (annotation instanceof OneToOne) {
             Object foreignId = relation.getForeign();
             // TODO: Could loop forever when looping relations in find()!!!
             Object foreignEntity = find(null, foreignId);
 
-            String fieldName = relation.getField();
+            String fieldName = relation.getFieldName();
             AnnotationManager.setFieldValue(fieldName, clonedEntity, foreignEntity);
         } else if (annotation instanceof OneToMany) {
             List foreignIds = (List) relation.getForeign();
-            List<Object> foreignEntitiesList = new ArrayList<>();
-
             String mappedBy = ((OneToMany) annotation).mappedBy();
 
-            for (Object foreignId : foreignIds) {
-                Object foreignEntity = find(null, foreignId);
-                foreignEntitiesList.add(foreignEntity);
-
-                if (!mappedBy.equals("")) {
-                    AnnotationManager.setFieldValue(mappedBy, foreignEntity, clonedEntity);
-                }
-            }
-            String fieldName = relation.getField();
-            AnnotationManager.setFieldValue(fieldName, clonedEntity, foreignEntitiesList);
+            // Initialize only with LazyList, load foreign Entities only after method invoke
+            LazyList lazyList = new LazyList(mappedBy, primaryKey, foreignIds, this);
+            AnnotationManager.setFieldValue(relation.getFieldName(), clonedEntity, lazyList);
         }
     }
 

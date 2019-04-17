@@ -2,18 +2,17 @@ package sk.vilk.diploy;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 
 public class Relation implements Serializable {
 
     private Annotation annotation;
-    // TODO: Save the whole field class or just name or sth?
-    private String field;
+    // TODO: Save the whole fieldName class or just name or sth?
+    private String fieldName;
     private Object foreign;
 
-    public Relation(Annotation annotation, String field, Object foreign) {
+    public Relation(Annotation annotation, String fieldName, Object foreign) {
         this.annotation = annotation;
-        this.field = field;
+        this.fieldName = fieldName;
         this.foreign = foreign;
     }
 
@@ -25,12 +24,12 @@ public class Relation implements Serializable {
         this.annotation = annotation;
     }
 
-    public String getField() {
-        return field;
+    public String getFieldName() {
+        return fieldName;
     }
 
-    public void setField(String field) {
-        this.field = field;
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
     }
 
     public Object getForeign() {
@@ -45,7 +44,7 @@ public class Relation implements Serializable {
     public String toString() {
         return "Relation{" +
                 "annotation=" + annotation +
-                ", field=" + field +
+                ", fieldName=" + fieldName +
                 ", foreign=" + foreign +
                 '}';
     }
