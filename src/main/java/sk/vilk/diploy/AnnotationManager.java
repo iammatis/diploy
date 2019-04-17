@@ -3,9 +3,6 @@ package sk.vilk.diploy;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import java.lang.annotation.Annotation;
@@ -38,19 +35,21 @@ class AnnotationManager {
 
                 if (annotation instanceof OneToOne) {
                     if (((OneToOne) annotation).mappedBy().equals("")) {
-                        Object idOfAnnotatedField = getIdValue(properties, fieldValue);
-                        entityWrapper.addRelation(new Relation(annotation, field.getName(), idOfAnnotatedField));
+                        if (fieldValue != null) {
+                            Object idOfAnnotatedField = getIdValue(properties, fieldValue);
+                            entityWrapper.addRelation(new Relation(annotation, field.getName(), idOfAnnotatedField));
+                        }
                     }
                 } else if (annotation instanceof OneToMany) {
                     List<Object> listOfIds = new ArrayList<>();
                     // TODO: Force cast to List, could be anything else!
                     List list = (List) fieldValue;
-                    for (Object value : list) {
-                        listOfIds.add(getIdValue(properties, value));
+                    if (list != null) {
+                        for (Object value : list) {
+                            listOfIds.add(getIdValue(properties, value));
+                        }
+                        entityWrapper.addRelation(new Relation(annotation, field.getName(), listOfIds));
                     }
-                    entityWrapper.addRelation(new Relation(annotation, field.getName(), listOfIds));
-                } else if (annotation instanceof ManyToMany) {
-//                    System.out.println("manytomany");
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();

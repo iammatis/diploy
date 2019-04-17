@@ -1071,7 +1071,7 @@ public class EntityManagerImpl implements EntityManager {
         return null;
     }
 
-    public void verifyOpen() {
+    private void verifyOpen() {
         if (!isOpen()) {
             throw new IllegalStateException("Entity Manager is already closed!");
         }
