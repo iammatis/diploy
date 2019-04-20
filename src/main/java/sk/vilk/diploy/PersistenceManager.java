@@ -93,22 +93,23 @@ public class PersistenceManager {
     }
 
     // findAll - used in lazy collection after method call
-    public List findAll(String mappedBy, Object entityId, List<String> foreignIds) {
+    public List findAll(String annotation, String mappedBy, Object entityId, List<String> foreignIds) {
         ArrayList<Object> relations = new ArrayList<>();
         Object relatedEntity = managedEntities.get(entityId);
         for (String foreignId: foreignIds) {
             Object entity = find(null, foreignId);
             relations.add(entity);
-
+            System.out.println(mappedBy);
             // Bidirectional relation aka mappedBy
-            AnnotationManager.setFieldValue(mappedBy, entity, relatedEntity);
+            if (annotation.equals("OneToMany")) {
+                AnnotationManager.setFieldValue(mappedBy, entity, relatedEntity);
+            }
         }
         return relations;
     }
 
     private void loadRelation(Relation relation, Object primaryKey, Object clonedEntity) {
         Annotation annotation = relation.getAnnotation();
-        System.out.println(clonedEntity);
         if (annotation instanceof OneToOne) {
             Object foreignId = relation.getForeign();
             // TODO: Could loop forever when looping relations in find()!!!
@@ -121,7 +122,13 @@ public class PersistenceManager {
             String mappedBy = ((OneToMany) annotation).mappedBy();
 
             // Initialize only with LazyList, load foreign Entities only after method invoke
-            LazyList lazyList = new LazyList(mappedBy, primaryKey, foreignIds, this);
+            LazyList lazyList = new LazyList("OneToMany", mappedBy, primaryKey, foreignIds, this);
+            AnnotationManager.setFieldValue(relation.getFieldName(), clonedEntity, lazyList);
+        } else if (annotation instanceof ManyToMany) {
+            List foreignIds = (List) relation.getForeign();
+            String mappedBy = ((ManyToMany) annotation).mappedBy();
+            // Initialize only with LazyList, load foreign Entities only after method invoke
+            LazyList lazyList = new LazyList("ManyToMany", mappedBy, primaryKey, foreignIds, this);
             AnnotationManager.setFieldValue(relation.getFieldName(), clonedEntity, lazyList);
         }
     }
@@ -134,6 +141,7 @@ public class PersistenceManager {
                 .filter(entry -> entry.getValue().hashCode() != persistedEntities.get(entry.getKey()).hashCode());
 
         // Save managedEntities with non-matching hashcodes
+        // TODO: Redo with stream instead of map ?
         Map<String, List<? extends Number>> metaObjects = FileManager.saveEntities(dirtyEntities.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         // Save Meta Objects to Map

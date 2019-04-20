@@ -2,6 +2,7 @@ package sk.vilk.diploy.collections;
 
 import sk.vilk.diploy.PersistenceManager;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -10,12 +11,14 @@ import java.util.ListIterator;
 public class LazyList implements List
 {
     private List list;
+    private String annotation;
     private String mappedBy;
     private Object entityId;
     private List<String> foreignIds;
     private PersistenceManager persistenceManager;
 
-    public LazyList(String mappedBy, Object entityId, List<String> foreignIds, PersistenceManager persistenceManager) {
+    public LazyList(String annotation, String mappedBy, Object entityId, List<String> foreignIds, PersistenceManager persistenceManager) {
+        this.annotation = annotation;
         this.mappedBy = mappedBy;
         this.entityId = entityId;
         this.foreignIds = foreignIds;
@@ -24,7 +27,7 @@ public class LazyList implements List
 
     private void loadRelations() {
         if (list == null) {
-            list = persistenceManager.findAll(mappedBy, entityId, foreignIds);
+            list = persistenceManager.findAll(annotation, mappedBy, entityId, foreignIds);
         }
     }
 

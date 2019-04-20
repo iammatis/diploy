@@ -10,6 +10,8 @@ import java.util.List;
  */
 public class EntityWrapper implements Serializable {
 
+    private static final long serialVersionUID = 5643176752935881157L;
+
     private Object entity;
     private List<Relation> relations;
     private LockModeType lockModeType = LockModeType.NONE;

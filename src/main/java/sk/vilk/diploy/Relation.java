@@ -5,6 +5,8 @@ import java.lang.annotation.Annotation;
 
 public class Relation implements Serializable {
 
+    private static final long serialVersionUID = 1496139794485210268L;
+
     private Annotation annotation;
     // TODO: Save the whole fieldName class or just name or sth?
     private String fieldName;

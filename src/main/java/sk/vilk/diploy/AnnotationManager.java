@@ -3,6 +3,8 @@ package sk.vilk.diploy;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import java.lang.annotation.Annotation;
@@ -40,7 +42,7 @@ class AnnotationManager {
                             entityWrapper.addRelation(new Relation(annotation, field.getName(), idOfAnnotatedField));
                         }
                     }
-                } else if (annotation instanceof OneToMany) {
+                } else if (annotation instanceof OneToMany || annotation instanceof ManyToMany) {
                     List<Object> listOfIds = new ArrayList<>();
                     // TODO: Force cast to List, could be anything else!
                     List list = (List) fieldValue;
