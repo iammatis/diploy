@@ -2,7 +2,6 @@ package sk.vilk.diploy;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -10,21 +9,25 @@ import java.util.List;
 
 public class Properties {
 
+    private Class entityClass;
+    // Unique identifier of class; UUID instead of Integer ? Wouldn't need to check for last Integer, just generate UUID
+    private Integer classId;
+    // Id field in class
     private Field idField;
-    private List<Field> regularFields;
-    private List<Pair<Annotation, Field>> relationFields;
+    private List<Field> fields;
+    private List<Pair<Annotation, Field>> relations;
 
     public Properties() {
-        regularFields = new ArrayList<>();
-        relationFields = new ArrayList<>();
+        fields = new ArrayList<>();
+        relations = new ArrayList<>();
     }
 
-    public void addRegularField(Field field) {
-        regularFields.add(field);
+    public void addField(Field field) {
+        fields.add(field);
     }
 
-    public void addRelationField(Annotation annotation, Field field) {
-        relationFields.add(new ImmutablePair<>(annotation, field));
+    public void addRelation(Annotation annotation, Field field) {
+        relations.add(new ImmutablePair<>(annotation, field));
     }
 
     public Field getIdField() {
@@ -35,28 +38,36 @@ public class Properties {
         this.idField = idField;
     }
 
-    public List<Field> getRegularFields() {
-        return regularFields;
+    public List<Field> getFields() {
+        return fields;
     }
 
-    public void setRegularFields(List<Field> regularFields) {
-        this.regularFields = regularFields;
+    public List<Pair<Annotation, Field>> getRelations() {
+        return relations;
     }
 
-    public List<Pair<Annotation, Field>> getRelationFields() {
-        return relationFields;
+    public Class getEntityClass() {
+        return entityClass;
     }
 
-    public void setRelationFields(List<Pair<Annotation, Field>> relationFields) {
-        this.relationFields = relationFields;
+    public void setEntityClass(Class entityClass) {
+        this.entityClass = entityClass;
+    }
+
+    public Integer getClassId() {
+        return classId;
+    }
+
+    public void setClassId(Integer classId) {
+        this.classId = classId;
     }
 
     @Override
     public String toString() {
         return "Properties{" +
                 "idField=" + idField +
-                ", regularFields=" + regularFields +
-                ", relationFields=" + relationFields +
+                ", fields=" + fields +
+                ", relations=" + relations +
                 '}';
     }
 }

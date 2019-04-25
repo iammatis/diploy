@@ -13,6 +13,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,7 +38,7 @@ class PersistenceManager {
     }
 
     void persist(Object entity) {
-        entityScanner.scanClass(entity);
+        entityScanner.scanClass(entity.getClass());
 
         Object entityId = AnnotationManager.getIdValue(entityScanner.getProperties(entity), entity);
 
@@ -63,6 +64,7 @@ class PersistenceManager {
     }
 
     <T> T find(Class<T> entityClass, Object primaryKey) {
+        entityScanner.scanClass(entityClass);
         Object entity = managedEntities.get(primaryKey);
         if (entity == null) {
             // First look in metaObjects

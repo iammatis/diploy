@@ -1,5 +1,8 @@
 package sk.vilk.diploy;
 
+import sk.vilk.diploy.utils.MetaDecoder;
+import sk.vilk.diploy.utils.MetaEncoder;
+
 import javax.persistence.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -20,37 +23,42 @@ public class EntityScanner {
         entityClasses = new HashMap<>();
     }
 
-    void scanClass(Object entity) {
-        Class<?> clazz = entity.getClass();
-
-        if (!contains(clazz)) {
-            Field[] fields = clazz.getDeclaredFields();
+    void scanClass(Class entityClass) {
+        if (!contains(entityClass)) {
+            Field[] fields = entityClass.getDeclaredFields();
             Properties properties = new Properties();
+            properties.setEntityClass(entityClass);
 
             for (Field field : fields) {
                 Annotation[] annotations = field.getDeclaredAnnotations();
 
-                if(isRelation(annotations)) {
-                    // TODO: Danger zone -> Takes first element, might cause problems (more annotations ? no annotation ?)
-                    Annotation annotation = annotations[0];
-                    properties.addRelationField(annotation, field);
+                Annotation annotation;
+                if((annotation = isRelation(annotations)) != null) {
+                    properties.addRelation(annotation, field);
                 } else if (isId(annotations)) {
                     properties.setIdField(field);
                 } else {
-                    properties.addRegularField(field);
+                    properties.addField(field);
                 }
             }
-            entityClasses.put(entity.getClass(), properties);
+            byte[] bytes = MetaEncoder.encode(properties);
+            System.out.println(properties);
+            System.out.println(MetaDecoder.decode(bytes));
+            // TODO: Append to meta file
+//            new MetaSerializer(properties).encode();
+            entityClasses.put(entityClass, properties);
         }
     }
 
-    Properties getProperties(Object entity) {
+    public Properties getProperties(Object entity) {
         return entityClasses.get(entity.getClass());
     }
 
-    private boolean isRelation(Annotation[] declaredAnnotations) {
-        // TODO: Should filter and return only relationship annotations not just true/false
-        return Arrays.stream(declaredAnnotations).anyMatch(annotation -> relationClasses.contains(annotation.annotationType()));
+    private Annotation isRelation(Annotation[] declaredAnnotations) {
+        for(Annotation annotation : declaredAnnotations) {
+            if (relationClasses.contains(annotation.annotationType())) return annotation;
+        }
+        return null;
     }
 
     private boolean isId(Annotation[] declaredAnnotations) {
