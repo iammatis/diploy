@@ -10,10 +10,9 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("Duplicates")
 public class MetaDecoder implements MetaConstants {
 
-    public static List<Properties> decode(byte[] bytes) {
+    public static List<Properties> decode(byte[] bytes) throws IllegalArgumentException {
         ClassBuffer byteBuffer = new ClassBuffer(bytes);
         List<Properties> list = new ArrayList<>();
 
@@ -68,15 +67,18 @@ public class MetaDecoder implements MetaConstants {
         return AnnotationManager.getField(fieldName, decodedClass);
     }
 
-    private static byte decodeFields(ClassBuffer byteBuffer, Class<?> decodedClass, Properties properties) {
+    private static byte decodeFields(ClassBuffer byteBuffer, Class<?> decodedClass, Properties properties) throws IllegalArgumentException {
         byte columnId = byteBuffer.get();
 
         while (columnId != RELATIONS_BYTES_START && columnId != ENTITY_BYTES_END) {
-            // TODO: Check field type ?
             byte fieldType = byteBuffer.get();
             Field field = decodeField(byteBuffer, decodedClass);
-            properties.addField(field);
 
+            if (!equalFieldTypes(fieldType, field)) {
+                throw new IllegalArgumentException("Type of field '" + field.getName() + "' has changed!");
+            }
+
+            properties.addField(field);
             columnId = byteBuffer.get();
         }
 
@@ -87,17 +89,18 @@ public class MetaDecoder implements MetaConstants {
         byte columnId = byteBuffer.get();
 
         while (columnId != ENTITY_BYTES_END) {
-            // TODO: Check relation type ?
             byte relationType = byteBuffer.get();
             String relationName = decodeString(byteBuffer);
 
             Field field = AnnotationManager.getField(relationName, decodedClass);
-            // TODO field might be null! Might it be? Exception should be thrown
             Class relationClass = getRelationClass(relationType);
             Annotation annotation = AnnotationManager.getAnnotation(field, relationClass);
 
-            properties.addRelation(annotation, field);
+            if (!equalRelationTypes(relationType, annotation)) {
+                throw new IllegalArgumentException("Relation of field '" + field.getName() + "' has changed!");
+            }
 
+            properties.addRelation(annotation, field);
             columnId = byteBuffer.get();
         }
     }
@@ -112,6 +115,31 @@ public class MetaDecoder implements MetaConstants {
                 return ManyToMany.class;
         }
         return null;
+    }
+
+
+    private static boolean equalFieldTypes(byte fieldType, Field field) {
+        switch (field.getType().getSimpleName()) {
+            case "String":
+                return fieldType == BYTE_VALUE_STRING;
+            case "Integer":
+                return fieldType == BYTE_VALUE_INTEGER;
+            default:
+                return false;
+        }
+    }
+
+    private static boolean equalRelationTypes(byte relationType, Annotation annotation) {
+        switch (annotation.annotationType().getSimpleName()) {
+            case "OneToOne":
+                return relationType == ONE_TO_ONE;
+            case "OneToMany":
+                return relationType == ONE_TO_MANY;
+            case "ManyToMany":
+                return relationType == MANY_TO_MANY;
+            default:
+                return false;
+        }
     }
 
 }

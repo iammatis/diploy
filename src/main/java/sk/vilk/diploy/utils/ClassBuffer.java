@@ -3,7 +3,6 @@ package sk.vilk.diploy.utils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
-@SuppressWarnings("Duplicates")
 public class ClassBuffer extends AbstractBuffer {
 
     public ClassBuffer(int capacity) {
