@@ -9,7 +9,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.*;
 
-class AnnotationManager {
+public class AnnotationManager {
 
     private static final Logger logger = LoggerFactory.getLogger(AnnotationManager.class);
 
@@ -26,7 +26,7 @@ class AnnotationManager {
 
     static EntityWrapper createEntityWrapper(Object entity, Properties properties) {
         EntityWrapper entityWrapper = new EntityWrapper();
-        for (Pair<Annotation, Field> pair : properties.getRelationFields()) {
+        for (Pair<Annotation, Field> pair : properties.getRelations()) {
             Field field = pair.getRight();
             Annotation annotation = pair.getLeft();
             field.setAccessible(true);
@@ -81,5 +81,27 @@ class AnnotationManager {
         } catch (IllegalAccessException e) {
             logger.error("Can't access field '"+ fieldName +"' in entity class '" + entity.getClass() + "' when setting field", e);
         }
+    }
+
+    public static Field getField(String fieldName, Class<?> decodedClass) {
+        try {
+            return decodedClass.getDeclaredField(fieldName);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Class<?> getDecodedClass(String className) {
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Annotation getAnnotation(Field field, Class relationClass) {
+        return field.getDeclaredAnnotation(relationClass);
     }
 }

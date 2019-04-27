@@ -12,7 +12,6 @@ import java.util.Map;
 public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
     private boolean closed = false;
-    private PersistenceManager persistenceManager = new PersistenceManager();
 
     public EntityManagerFactoryImpl() {
     }
@@ -224,9 +223,5 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      */
     public <T> void addNamedEntityGraph(String graphName, EntityGraph<T> entityGraph) {
         //TODO: Implement addNamedEntityGraph
-    }
-
-    public PersistenceManager getPersistenceManager() {
-        return persistenceManager;
     }
 }

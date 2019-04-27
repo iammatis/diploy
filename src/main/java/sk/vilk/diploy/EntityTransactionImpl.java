@@ -67,7 +67,7 @@ public class EntityTransactionImpl implements EntityTransaction {
         Map<String, Object> managed = persistenceManager.getManagedEntities();
         Map<String, EntityWrapper> persisted = persistenceManager.getPersistedEntities();
         Map<String, MetaObject> metaObjects = persistenceManager.getMetaManager().getMetaObjects();
-        EntityScanner entityScanner = persistenceManager.getEntityScanner();
+        ClassScanner entityScanner = persistenceManager.getEntityScanner();
         ArrayList<byte[]> bytesToSave = new ArrayList<>();
         long fileLength = getFileLength();
 

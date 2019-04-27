@@ -2,7 +2,6 @@ package sk.vilk.diploy;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 
 public class Relation implements Serializable {
 

@@ -28,16 +28,17 @@ class PersistenceManager {
     private Map<String, EntityWrapper> persistedEntities = new HashMap<>();
     // MetaManager
     private MetaManager metaManager;
-    private EntityScanner entityScanner;
+    private ClassScanner entityScanner;
 
     PersistenceManager() {
-        entityScanner = new EntityScanner();
+        entityScanner = new ClassScanner();
         metaManager = new MetaManager();
+        entityScanner.initiate();
         metaManager.initMeta();
     }
 
     void persist(Object entity) {
-        entityScanner.scanClass(entity);
+        entityScanner.scan(entity.getClass());
 
         Object entityId = AnnotationManager.getIdValue(entityScanner.getProperties(entity), entity);
 
@@ -63,6 +64,7 @@ class PersistenceManager {
     }
 
     <T> T find(Class<T> entityClass, Object primaryKey) {
+        entityScanner.scan(entityClass);
         Object entity = managedEntities.get(primaryKey);
         if (entity == null) {
             // First look in metaObjects
@@ -192,7 +194,7 @@ class PersistenceManager {
         return persistedEntities;
     }
 
-    EntityScanner getEntityScanner() {
+    ClassScanner getEntityScanner() {
         return entityScanner;
     }
 }
