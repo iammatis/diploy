@@ -7,14 +7,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 public class MetaDecoder implements MetaConstants {
 
-    public static List<Properties> decode(byte[] bytes) throws IllegalArgumentException {
+    public static HashMap<Class, Properties> decode(byte[] bytes) throws IllegalArgumentException {
         ClassBuffer byteBuffer = new ClassBuffer(bytes);
-        List<Properties> list = new ArrayList<>();
+        HashMap<Class, Properties> classes = new HashMap<>();
 
         while (byteBuffer.hasRemaining()) {
             Properties properties = new Properties();
@@ -40,10 +39,10 @@ public class MetaDecoder implements MetaConstants {
                 decodeRelations(byteBuffer, decodedClass, properties);
             }
 
-            list.add(properties);
+            classes.put(decodedClass, properties);
         }
 
-        return list;
+        return classes;
     }
 
 
