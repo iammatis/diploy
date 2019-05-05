@@ -13,7 +13,8 @@ public class InstanceManager {
         try {
             // TODO: Entity class needs to have an empty constructor for this to work!
             Object newInstance = entity.getClass().getDeclaredConstructor().newInstance();
-            for (Field field : properties.getFields()) {
+            for (Column column : properties.getPlainObjects()) {
+                Field field = column.getField();
                 field.setAccessible(true);
                 Object fieldValue = field.get(entity);
                 field.set(newInstance, fieldValue);

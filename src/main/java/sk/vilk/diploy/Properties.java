@@ -1,8 +1,5 @@
 package sk.vilk.diploy;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,20 +11,20 @@ public class Properties {
     private Integer classId;
     // Id field in class
     private Field idField;
-    private List<Field> fields;
-    private List<Pair<Annotation, Field>> relations;
+    private List<Column> plainObjects;
+    private List<RelationalColumn> relations;
 
     public Properties() {
-        fields = new ArrayList<>();
+        plainObjects = new ArrayList<>();
         relations = new ArrayList<>();
     }
 
-    public void addField(Field field) {
-        fields.add(field);
+    public void addPlainObject(Column column) {
+        plainObjects.add(column);
     }
 
-    public void addRelation(Annotation annotation, Field field) {
-        relations.add(new ImmutablePair<>(annotation, field));
+    public void addRelation(RelationalColumn column) {
+        relations.add(column);
     }
 
     public Field getIdField() {
@@ -38,11 +35,11 @@ public class Properties {
         this.idField = idField;
     }
 
-    public List<Field> getFields() {
-        return fields;
+    public List<Column> getPlainObjects() {
+        return plainObjects;
     }
 
-    public List<Pair<Annotation, Field>> getRelations() {
+    public List<RelationalColumn> getRelations() {
         return relations;
     }
 
@@ -66,7 +63,7 @@ public class Properties {
     public String toString() {
         return "Properties{" +
                 "idField=" + idField +
-                ", fields=" + fields +
+                ", plainObjects=" + plainObjects +
                 ", relations=" + relations +
                 '}';
     }

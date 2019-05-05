@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class ClassScanner {
 
-    private HashMap<Class, Properties> classes;
+    private static HashMap<Class, Properties> classes;
     private static final List<Class<?>> relationClasses = List.of(OneToOne.class, OneToMany.class, ManyToOne.class, ManyToMany.class);
 
     ClassScanner() {
@@ -30,6 +30,7 @@ public class ClassScanner {
             MetaFileManager.append(bytes);
             classes.put(entityClass, properties);
         }
+        System.out.println(classes);
     }
 
     private Properties getProperties(Class entityClass) {
@@ -37,17 +38,22 @@ public class ClassScanner {
 
         Field[] fields = entityClass.getDeclaredFields();
         properties.setEntityClass(entityClass);
+        byte columnId = 1;
 
         for (Field field : fields) {
             Annotation[] annotations = field.getDeclaredAnnotations();
 
             Annotation annotation;
             if((annotation = isRelation(annotations)) != null) {
-                properties.addRelation(annotation, field);
+                RelationalColumn column = new RelationalColumn(field, columnId, annotation);
+                properties.addRelation(column);
+                columnId++;
             } else if (isId(annotations)) {
                 properties.setIdField(field);
             } else {
-                properties.addField(field);
+                Column column = new Column(field, columnId);
+                properties.addPlainObject(column);
+                columnId++;
             }
         }
 
@@ -69,7 +75,7 @@ public class ClassScanner {
         return classes.containsKey(clazz);
     }
 
-    public Properties getProperties(Object entity) {
+    public static Properties getProperties(Object entity) {
         return classes.get(entity.getClass());
     }
 
@@ -77,7 +83,7 @@ public class ClassScanner {
         byte[] bytes = MetaFileManager.read();
 
         if (bytes != null) {
-            this.classes = MetaDecoder.decode(bytes);
+            classes = MetaDecoder.decode(bytes);
         }
     }
 }

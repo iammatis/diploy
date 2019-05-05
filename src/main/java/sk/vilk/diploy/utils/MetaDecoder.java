@@ -1,7 +1,9 @@
 package sk.vilk.diploy.utils;
 
 import sk.vilk.diploy.AnnotationManager;
+import sk.vilk.diploy.Column;
 import sk.vilk.diploy.Properties;
+import sk.vilk.diploy.RelationalColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -77,8 +79,9 @@ public class MetaDecoder implements MetaConstants {
                 throw new IllegalArgumentException("Type of field '" + field.getName() + "' has changed!");
             }
 
-            properties.addField(field);
             columnId = byteBuffer.get();
+            Column column = new Column(field, columnId);
+            properties.addPlainObject(column);
         }
 
         return columnId;
@@ -99,8 +102,9 @@ public class MetaDecoder implements MetaConstants {
                 throw new IllegalArgumentException("Relation of field '" + field.getName() + "' has changed!");
             }
 
-            properties.addRelation(annotation, field);
             columnId = byteBuffer.get();
+            RelationalColumn column = new RelationalColumn(field, columnId, annotation);
+            properties.addRelation(column);
         }
     }
 

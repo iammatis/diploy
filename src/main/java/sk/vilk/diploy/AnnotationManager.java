@@ -26,9 +26,9 @@ public class AnnotationManager {
 
     static EntityWrapper createEntityWrapper(Object entity, Properties properties) {
         EntityWrapper entityWrapper = new EntityWrapper();
-        for (Pair<Annotation, Field> pair : properties.getRelations()) {
-            Field field = pair.getRight();
-            Annotation annotation = pair.getLeft();
+        for (RelationalColumn relation : properties.getRelations()) {
+            Field field = relation.getField();
+            Annotation annotation = relation.getAnnotation();
             field.setAccessible(true);
             try {
                 Object fieldValue = field.get(entity);
@@ -58,7 +58,7 @@ public class AnnotationManager {
         return entityWrapper;
     }
 
-    static Object getFieldValue(String fieldName, Object entity) {
+    public static Object getFieldValue(String fieldName, Object entity) {
         try {
             Field field = entity.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);

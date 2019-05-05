@@ -1,9 +1,11 @@
 package sk.vilk.diploy.utils;
 
 import org.apache.commons.lang3.tuple.Pair;
+import sk.vilk.diploy.Column;
 import sk.vilk.diploy.Properties;
+import sk.vilk.diploy.RelationalColumn;
+
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 
 public class MetaEncoder implements MetaConstants {
@@ -31,20 +33,17 @@ public class MetaEncoder implements MetaConstants {
         byteBuffer.putInt(1);
 
         // Fields
-        if (!properties.getFields().isEmpty()) byteBuffer.putByte(FIELDS_BYTES_START);
-        byte columnId = 1;
-        for (Field field : properties.getFields()) {
-            byteBuffer.putByte(columnId);
-            byteBuffer.putField(field);
-            columnId++;
+        if (!properties.getPlainObjects().isEmpty()) byteBuffer.putByte(FIELDS_BYTES_START);
+        for (Column plainObject : properties.getPlainObjects()) {
+            byteBuffer.putByte(plainObject.getId());
+            byteBuffer.putField(plainObject.getField());
         }
 
         // Relations
         if (!properties.getRelations().isEmpty()) byteBuffer.putByte(RELATIONS_BYTES_START);
-        for (Pair<Annotation, Field> pair : properties.getRelations()) {
-            byteBuffer.putByte(columnId);
-            byteBuffer.putField(pair.getLeft(), pair.getRight());
-            columnId++;
+        for (RelationalColumn relation : properties.getRelations()) {
+            byteBuffer.putByte(relation.getId());
+            byteBuffer.putField(relation.getAnnotation(), relation.getField());
         }
 
         byteBuffer.putByte(ENTITY_BYTES_END);
@@ -62,14 +61,14 @@ public class MetaEncoder implements MetaConstants {
                 .getName()
                 .getBytes(Charset.forName(CHARSET)).length;
 
-        int fieldsByteSize = properties.getFields()
+        int fieldsByteSize = properties.getPlainObjects()
                 .stream()
-                .mapToInt(field -> field.getName().getBytes(Charset.forName(CHARSET)).length)
+                .mapToInt(column -> column.getField().getName().getBytes(Charset.forName(CHARSET)).length)
                 .sum();
 
         int relationsByteSize = properties.getRelations()
                 .stream()
-                .mapToInt(pair -> pair.getRight().getName().getBytes(Charset.forName(CHARSET)).length)
+                .mapToInt(pair -> pair.getField().getName().getBytes(Charset.forName(CHARSET)).length)
                 .sum();
 
         return
@@ -83,7 +82,7 @@ public class MetaEncoder implements MetaConstants {
                    Size of field name before every field (therefore fields.size()),
                    it is also doubled because there is field type before every field name
                  */
-                1 + fieldsByteSize + properties.getFields().size() * 3 +
+                1 + fieldsByteSize + properties.getPlainObjects().size() * 3 +
                 /* One byte to store relation flag 126
                    Relation bytes itself
                    Size of relation name before every (therefore relations.size()),
