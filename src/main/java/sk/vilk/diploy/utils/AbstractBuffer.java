@@ -20,6 +20,26 @@ public abstract class AbstractBuffer implements MetaConstants {
         byteBuffer = ByteBuffer.wrap(bytes);
     }
 
+    public void putAnnotation(Annotation annotation, Field field) {
+        switch (annotation.annotationType().getSimpleName()) {
+            case "OneToOne":
+                putOneToOne(annotation, field);
+                break;
+            case "OneToMany":
+                putOneToMany(annotation, field);
+                break;
+            case "ManyToMany":
+                putManyToMany(annotation, field);
+                break;
+        }
+    }
+
+    public abstract void putOneToOne(Annotation annotation, Field field);
+
+    public abstract void putOneToMany(Annotation annotation, Field field);
+
+    public abstract void putManyToMany(Annotation annotation, Field field);
+
     public abstract void putField(Field field);
 
     public abstract void putField(Annotation annotation, Field field);

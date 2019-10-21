@@ -31,21 +31,26 @@ public class ClassBuffer extends AbstractBuffer {
 
     @Override
     public void putField(Annotation annotation, Field field) {
-        switch (annotation.annotationType().getSimpleName()) {
-            case "OneToOne":
-                byteBuffer.put(ONE_TO_ONE);
-                break;
-            case "OneToMany":
-                byteBuffer.put(ONE_TO_MANY);
-                break;
-            case "ManyToMany":
-                byteBuffer.put(MANY_TO_MANY);
-                break;
-        }
+        putAnnotation(annotation, null);
 
         String fieldName = field.getName();
         byteBuffer.put((byte) fieldName.length());
         putString(fieldName);
+    }
+
+    @Override
+    public void putOneToOne(Annotation annotation, Field field) {
+        byteBuffer.put(ONE_TO_ONE);
+    }
+
+    @Override
+    public void putOneToMany(Annotation annotation, Field field) {
+        byteBuffer.put(ONE_TO_MANY);
+    }
+
+    @Override
+    public void putManyToMany(Annotation annotation, Field field) {
+        byteBuffer.put(MANY_TO_MANY);
     }
 
 }

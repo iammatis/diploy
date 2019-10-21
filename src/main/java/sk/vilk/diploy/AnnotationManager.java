@@ -58,6 +58,16 @@ public class AnnotationManager {
         return entityWrapper;
     }
 
+    public static Object getFieldValue(Field field, Object entity) {
+        try {
+            field.setAccessible(true);
+            return field.get(entity);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static Object getFieldValue(String fieldName, Object entity) {
         try {
             Field field = entity.getClass().getDeclaredField(fieldName);
