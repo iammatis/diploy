@@ -1,4 +1,8 @@
 target/
 example/
-.idea
 *.bin
+
+.idea
+.classpath
+.project
+.settings/
