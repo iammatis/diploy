@@ -32,22 +32,32 @@ public class InputByteBuffer implements InputBuffer {
 
     @Override
     public int readInt() {
-        return readSignedVarInt();
+        return ((((int)bytes[position++]) << 24) |
+                (((int)bytes[position++] & 0xFF) << 16) |
+                (((int)bytes[position++] & 0xFF) <<  8) |
+                (((int)bytes[position++] & 0xFF)));
     }
 
     @Override
     public long readLong() {
-        return readSignedVarLong();
+        return ((((long)bytes[position++]) << 56) |
+                (((long)bytes[position++] & 0xFF) << 48) |
+                (((long)bytes[position++] & 0xFF) << 40) |
+                (((long)bytes[position++] & 0xFF) << 32) |
+                (((long)bytes[position++] & 0xFF) << 24) |
+                (((long)bytes[position++] & 0xFF) << 16) |
+                (((long)bytes[position++] & 0xFF) <<  8) |
+                (((long)bytes[position++] & 0xFF)));
     }
 
     @Override
     public double readDouble() {
-        return Double.longBitsToDouble(readLong());
+        return Double.longBitsToDouble(readSignedVarLong());
     }
 
     @Override
     public float readFloat() {
-        return Float.intBitsToFloat(readInt());
+        return Float.intBitsToFloat(readSignedVarInt());
     }
 
     public char readChar() {

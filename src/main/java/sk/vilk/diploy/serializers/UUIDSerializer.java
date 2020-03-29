@@ -5,11 +5,13 @@ import sk.vilk.diploy.buffer.OutputBuffer;
 
 import java.util.UUID;
 
-public class UUIDSerializer implements ArraySerializer<UUID> {
+public class UUIDSerializer implements Serializer<UUID> {
     @Override
-    public void serialize(OutputBuffer out, UUID value) {
+    public int serialize(OutputBuffer out, UUID value) {
         out.writeLong(value.getMostSignificantBits());
         out.writeLong(value.getLeastSignificantBits());
+
+        return 16;
     }
 
     @Override
@@ -18,7 +20,7 @@ public class UUIDSerializer implements ArraySerializer<UUID> {
     }
 
     @Override
-    public Class type() {
+    public Class<UUID> type() {
         return UUID.class;
     }
 

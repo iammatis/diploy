@@ -6,28 +6,30 @@ import org.testng.annotations.Test;
 import sk.vilk.diploy.buffer.InputBuffer;
 import sk.vilk.diploy.buffer.InputByteBuffer;
 import sk.vilk.diploy.buffer.OutputByteBuffer;
-import sk.vilk.diploy.serializers.UUIDArraySerializer;
+import sk.vilk.diploy.serializers.IntegerArraySerializer;
 
-import java.util.UUID;
-
-public class UUIDArraySerializerTest {
+public class IntegerArraySerializerTest {
     private OutputByteBuffer outputBuffer;
-    private UUIDArraySerializer serializer;
+    private IntegerArraySerializer serializer;
 
     @BeforeMethod
     public void setup() {
-        serializer = new UUIDArraySerializer();
+        serializer = new IntegerArraySerializer();
         outputBuffer = new OutputByteBuffer();
     }
 
     @Test
-    public void serializeAndDeserializeTest() {
-        UUID[] array = new UUID[]{UUID.randomUUID(), UUID.randomUUID()};
+    public void typeTest() {
+        Assert.assertEquals(Integer[].class, serializer.type());
+    }
+
+    @Test
+    public void arrayTest() {
+        Integer[] array = {1, Integer.MIN_VALUE, 2, Integer.MAX_VALUE, 3};
         serializer.serialize(outputBuffer, array);
 
         InputBuffer inputBuffer = new InputByteBuffer(outputBuffer.getBytes());
-        UUID[] deserialized = serializer.deserialize(inputBuffer);
-
-        Assert.assertEquals(array, deserialized);
+        Integer[] deserialized = serializer.deserialize(inputBuffer);
+        Assert.assertEquals(deserialized, array);
     }
 }

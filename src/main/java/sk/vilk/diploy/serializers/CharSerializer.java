@@ -5,8 +5,8 @@ import sk.vilk.diploy.buffer.OutputBuffer;
 
 public class CharSerializer implements Serializer<Character> {
     @Override
-    public void serialize(OutputBuffer out, Character value) {
-        out.writeChar(value);
+    public int serialize(OutputBuffer out, Character value) {
+        return out.writeChar(value);
     }
 
     @Override
@@ -15,7 +15,7 @@ public class CharSerializer implements Serializer<Character> {
     }
 
     @Override
-    public Class type() {
+    public Class<Character> type() {
         return Character.class;
     }
 

@@ -5,8 +5,8 @@ import sk.vilk.diploy.buffer.OutputBuffer;
 
 public class StringSerializer implements Serializer<String> {
     @Override
-    public void serialize(OutputBuffer out, String value) {
-        out.writeString(value);
+    public int serialize(OutputBuffer out, String value) {
+        return out.writeString(value);
     }
 
     @Override
@@ -15,7 +15,7 @@ public class StringSerializer implements Serializer<String> {
     }
 
     @Override
-    public Class type() {
+    public Class<?> type() {
         return String.class;
     }
 }

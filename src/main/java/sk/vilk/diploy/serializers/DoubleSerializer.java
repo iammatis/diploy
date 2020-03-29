@@ -5,9 +5,8 @@ import sk.vilk.diploy.buffer.OutputBuffer;
 
 public class DoubleSerializer implements Serializer<Double> {
     @Override
-    public void serialize(OutputBuffer out, Double value) {
-        System.out.println("value: " + value);
-        out.writeDouble(value);
+    public int serialize(OutputBuffer out, Double value) {
+        return out.writeDouble(value);
     }
 
     @Override
@@ -16,7 +15,7 @@ public class DoubleSerializer implements Serializer<Double> {
     }
 
     @Override
-    public Class type() {
+    public Class<Double> type() {
         return Double.class;
     }
 

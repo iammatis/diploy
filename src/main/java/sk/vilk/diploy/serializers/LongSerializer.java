@@ -5,18 +5,17 @@ import sk.vilk.diploy.buffer.OutputBuffer;
 
 public class LongSerializer implements Serializer<Long> {
     @Override
-    public void serialize(OutputBuffer out, Long value) {
-        System.out.println("value: " + value);
-        out.writeLong(value);
+    public int serialize(OutputBuffer out, Long value) {
+        return out.writeSignedVarLong(value);
     }
 
     @Override
     public Long deserialize(InputBuffer in) {
-        return in.readLong();
+        return in.readSignedVarLong();
     }
 
     @Override
-    public Class type() {
+    public Class<Long> type() {
         return Long.class;
     }
 

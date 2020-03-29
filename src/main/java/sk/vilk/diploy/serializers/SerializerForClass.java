@@ -7,13 +7,13 @@ import java.util.UUID;
 import static sk.vilk.diploy.serializers.Serializers.*;
 
 public class SerializerForClass {
-    private static HashMap<Class, Serializer> SERIALIZER_FOR_CLASS = new HashMap<>();
+    private static HashMap<Class<?>, Serializer<?>> SERIALIZER_FOR_CLASS = new HashMap<>();
 
     static {
         SERIALIZER_FOR_CLASS.put(short.class, SHORT);
         SERIALIZER_FOR_CLASS.put(Short.class, SHORT);
-        SERIALIZER_FOR_CLASS.put(int.class, INTEGER);
         SERIALIZER_FOR_CLASS.put(Integer.class, INTEGER);
+        SERIALIZER_FOR_CLASS.put(Integer[].class, INTEGER_ARRAY);
         SERIALIZER_FOR_CLASS.put(long.class, LONG);
         SERIALIZER_FOR_CLASS.put(Long.class, LONG);
         SERIALIZER_FOR_CLASS.put(double.class, DOUBLE);
@@ -32,8 +32,7 @@ public class SerializerForClass {
         SERIALIZER_FOR_CLASS.put(Date.class, DATE);
     }
 
-    @SuppressWarnings("rawtypes")
-    public static <R> Serializer get(Class<R> clazz) {
+    public static <R> Serializer<?> get(Class<R> clazz) {
         return SERIALIZER_FOR_CLASS.get(clazz);
     }
 }

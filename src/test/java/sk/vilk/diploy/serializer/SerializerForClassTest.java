@@ -18,7 +18,7 @@ public class SerializerForClassTest {
     public void setup() {
         classes.put(short.class, ShortSerializer.class);
         classes.put(Short.class, ShortSerializer.class);
-        classes.put(int.class, IntegerSerializer.class);
+//        classes.put(int.class, IntegerSerializer.class);
         classes.put(Integer.class, IntegerSerializer.class);
         classes.put(long.class, LongSerializer.class);
         classes.put(Long.class, LongSerializer.class);

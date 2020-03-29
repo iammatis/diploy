@@ -5,8 +5,8 @@ import sk.vilk.diploy.buffer.OutputBuffer;
 
 public class ShortSerializer implements Serializer<Short> {
     @Override
-    public void serialize(OutputBuffer out, Short value) {
-        out.writeShort(value);
+    public int serialize(OutputBuffer out, Short value) {
+        return out.writeShort(value);
     }
 
     @Override

@@ -7,6 +7,7 @@ public class Serializers {
 
     public static Serializer<Short> SHORT = new ShortSerializer();
     public static Serializer<Integer> INTEGER = new IntegerSerializer();
+    public static Serializer<Integer[]> INTEGER_ARRAY = new IntegerArraySerializer();
     public static Serializer<Long> LONG = new LongSerializer();
     public static Serializer<Double> DOUBLE = new DoubleSerializer();
     public static Serializer<Float> FLOAT = new FloatSerializer();

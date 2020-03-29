@@ -5,8 +5,8 @@ import sk.vilk.diploy.buffer.OutputBuffer;
 
 public class BooleanSerializer implements Serializer<Boolean> {
     @Override
-    public void serialize(OutputBuffer out, Boolean value) {
-        out.writeBoolean(value);
+    public int serialize(OutputBuffer out, Boolean value) {
+        return out.writeBoolean(value);
     }
 
     @Override
@@ -15,7 +15,7 @@ public class BooleanSerializer implements Serializer<Boolean> {
     }
 
     @Override
-    public Class type() {
+    public Class<Boolean> type() {
         return Boolean.class;
     }
 

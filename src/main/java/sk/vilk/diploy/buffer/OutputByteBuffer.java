@@ -7,21 +7,22 @@ public class OutputByteBuffer implements OutputBuffer {
     private int position;
     private byte[] bytes;
     private int sizeMask;
-    private final int DEFAULT_SIZE = 128;
+    private int size;
+    private static final int DEFAULT_SIZE = 128;
 
     public OutputByteBuffer() {
-        this.position = 0;
-        this.bytes = new byte[DEFAULT_SIZE];
-        this.sizeMask = 0xFFFFFFFF - (DEFAULT_SIZE - 1);
+        this(DEFAULT_SIZE);
     }
 
     public OutputByteBuffer(int size) {
         this.position = 0;
+        this.size = 0;
         this.bytes = new byte[size];
-        this.sizeMask = 0xFFFFFFFF-(size - 1);
+        this.sizeMask = 0xFFFFFFFF - (size - 1);
     }
 
     private void checkSize(int numOfBytes) {
+        size += numOfBytes;
         numOfBytes += position;
         if ((numOfBytes & sizeMask) != 0) {
             resize(numOfBytes);
@@ -34,106 +35,218 @@ public class OutputByteBuffer implements OutputBuffer {
         bytes = Arrays.copyOf(bytes, size);
     }
 
+    @Override
+    public int skip(int bytes) {
+        int currentPosition = position;
+        checkSize(bytes);
+        position += bytes;
+        return currentPosition;
+    }
 
     @Override
-    public void writeByte(byte value) {
+    public int writeByte(byte value) {
         checkSize(1);
         bytes[position++] = value;
+
+        return 1;
     }
 
     @Override
-    public void writeByte(int value) {
+    public int writeByte(int value) {
         writeByte((byte) value);
+
+        return 1;
     }
 
     @Override
-    public void writeBytes(byte[] value) {
-        writeBytes(value, 0, value.length);
+    public int writeBytes(byte[] value) {
+        int length = value.length;
+        writeBytes(value, 0, length);
+
+        return length;
     }
 
     @Override
-    public void writeBytes(byte[] source, int offset, int length) {
+    public int writeBytes(byte[] source, int offset, int length) {
         checkSize(length);
         System.arraycopy(source, offset, bytes, position, length);
         position += length;
+
+        return length;
     }
 
     @Override
-    public void writeBoolean(boolean value) {
+    public int insertBytes(byte[] source, int position, int length) {
+        checkSize(length);
+        System.arraycopy(source, 0, bytes, position, length);
+
+        return length;
+    }
+
+    @Override
+    public long insertBufferLength(int position) {
+        long v = bytes.length;
+        byte[] buf = new byte[8];
+        int pos = 0;
+
+        buf[pos++] = (byte) (0xff & (v >> 56));
+        buf[pos++] = (byte) (0xff & (v >> 48));
+        //$DELAY$
+        buf[pos++] = (byte) (0xff & (v >> 40));
+        buf[pos++] = (byte) (0xff & (v >> 32));
+        buf[pos++] = (byte) (0xff & (v >> 24));
+        //$DELAY$
+        buf[pos++] = (byte) (0xff & (v >> 16));
+        buf[pos++] = (byte) (0xff & (v >> 8));
+        buf[pos] = (byte) (0xff & (v));
+
+//        int index = 0;
+//        for (int i = 56; i >= 8; i -= 8) {
+//            longBytes[index++] = (byte) (0xFF & (bufferLength >> i));
+//        }
+//        longBytes[index] = (byte) (0xFF & bufferLength);
+//
+        insertBytes(buf, position, 8);
+        return v;
+    }
+
+    @Override
+    public int writeBoolean(boolean value) {
         checkSize(1);
         bytes[position++] = (byte) (value ? 1 : 0);
+
+        return 1;
     }
 
     @Override
-    public void writeShort(short value) {
+    public int writeShort(short value) {
         checkSize(2);
         bytes[position++] = (byte) (0xff & (value >> 8));
         bytes[position++] = (byte) (0xff & value);
+
+        return 2;
     }
 
     @Override
-    public void writeInt(int value) {
-        writeSignedVarInt(value);
+    public int writeInt(int value) {
+        checkSize(4);
+        bytes[position++] = (byte) (0xff & (value >> 24));
+        bytes[position++] = (byte) (0xff & (value >> 16));
+        bytes[position++] = (byte) (0xff & (value >> 8));
+        bytes[position++] = (byte) (0xff & value);
+
+        return 4;
     }
 
     @Override
-    public void writeLong(long value) {
-        writeSignedVarLong(value);
+    public int writeLong(long value) {
+        checkSize(8);
+        bytes[position++] = (byte) (0xff & (value >> 56));
+        bytes[position++] = (byte) (0xff & (value >> 48));
+        bytes[position++] = (byte) (0xff & (value >> 40));
+        bytes[position++] = (byte) (0xff & (value >> 32));
+        bytes[position++] = (byte) (0xff & (value >> 24));
+        bytes[position++] = (byte) (0xff & (value >> 16));
+        bytes[position++] = (byte) (0xff & (value >> 8));
+        bytes[position++] = (byte) (0xff & value);
+
+        return 8;
     }
 
     @Override
-    public void writeDouble(double value) {
-        writeLong(Double.doubleToLongBits(value));
+    public int writeDouble(double value) {
+        return writeSignedVarLong(Double.doubleToLongBits(value));
     }
 
     @Override
-    public void writeFloat(float value) {
-        writeInt(Float.floatToIntBits(value));
+    public int writeFloat(float value) {
+        return writeSignedVarInt(Float.floatToIntBits(value));
     }
 
     @Override
-    public void writeChar(char value) {
+    public int writeChar(char value) {
+        checkSize(2);
         bytes[position++] = (byte) (value >> 8);
         bytes[position++] = (byte) value;
+
+        return 2;
     }
 
     @Override
-    public void writeString(String value) {
+    public int writeString(String value) {
+        int size = this.size;
         int length = value.length();
         writeUnsignedVarInt(length);
         writeBytes(value.getBytes());
+
+        return this.size - size;
     }
 
-    public byte[] getBytes() {
-        return bytes;
-    }
 
-
-    /*
-        VARINT
+    /**
+     *
+     * Variable length number
+     *
      */
 
-    public void writeSignedVarInt(int value) {
-        writeUnsignedVarInt((value << 1) ^ (value >> 31));
+    public int writeSignedVarInt(int value) {
+        return writeUnsignedVarInt((value << 1) ^ (value >> 31));
     }
 
-    public void writeUnsignedVarInt(int value) {
+    public int writeUnsignedVarInt(int value) {
+        int size = this.size;
         while ((value & 0xFFFFFF80) != 0L) {
             writeByte((value & 0x7F) | 0x80);
             value >>>= 7;
         }
         writeByte(value & 0x7F);
+
+        return this.size - size;
     }
 
-    public void writeSignedVarLong(long value)  {
-        writeUnsignedVarLong((value << 1) ^ (value >> 63));
+    public int writeSignedVarLong(long value)  {
+       return writeUnsignedVarLong((value << 1) ^ (value >> 63));
     }
 
-    public void writeUnsignedVarLong(long value) {
+    public int writeUnsignedVarLong(long value) {
+        int size = this.size;
         while ((value & 0xFFFFFFFFFFFFFF80L) != 0L) {
             writeByte(((int) value & 0x7F) | 0x80);
             value >>>= 7;
         }
         writeByte((int) value & 0x7F);
+
+        return this.size - size;
+    }
+
+    /**
+     * Accessors
+     * @return byte[]
+     */
+
+    public byte[] getBytes() {
+        return bytes;
+    }
+
+    public byte[] toBytes() {
+        return slice(bytes, 0, position);
+    }
+
+    private byte[] slice(byte[] bytes, int start, int end) {
+        int length = bytes.length;
+
+        if (end > length) {
+            System.out.println("Too big");
+//            throw new Exception("Too big");
+        }
+
+        if (start > end) {
+            System.out.println("Too far");
+        }
+
+        int newLength = end - start;
+        byte[] newBytes = new byte[newLength];
+        System.arraycopy(bytes, start, newBytes, 0, newLength);
+        return newBytes;
     }
 }

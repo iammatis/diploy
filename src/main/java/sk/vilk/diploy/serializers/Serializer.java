@@ -4,11 +4,11 @@ import sk.vilk.diploy.buffer.InputBuffer;
 import sk.vilk.diploy.buffer.OutputBuffer;
 
 public interface Serializer<T> {
-    public void serialize(OutputBuffer out, T value);
+    int serialize(OutputBuffer out, T value);
 
-    public T deserialize(InputBuffer in);
+    T deserialize(InputBuffer in);
 
-    public Class type();
+    Class<?> type();
 
     // TODO: Useless?
     default int size() {

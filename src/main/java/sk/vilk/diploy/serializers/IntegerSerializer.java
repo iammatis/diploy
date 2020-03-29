@@ -5,17 +5,17 @@ import sk.vilk.diploy.buffer.OutputBuffer;
 
 public class IntegerSerializer implements Serializer<Integer> {
     @Override
-    public void serialize(OutputBuffer out, Integer value) {
-        out.writeInt(value);
+    public int serialize(OutputBuffer out, Integer value) {
+        return out.writeSignedVarInt(value);
     }
 
     @Override
     public Integer deserialize(InputBuffer in) {
-        return in.readInt();
+        return in.readSignedVarInt();
     }
 
     @Override
-    public Class type() {
+    public Class<Integer> type() {
         return Integer.class;
     }
 

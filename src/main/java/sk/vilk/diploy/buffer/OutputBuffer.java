@@ -1,30 +1,48 @@
 package sk.vilk.diploy.buffer;
 
-import java.io.OutputStream;
-
 public interface OutputBuffer {
 
-    void writeByte(int value);
+    int skip(int bytes);
 
-    void writeByte(byte value);
+    int writeByte(int value);
 
-    public void writeBytes(byte[] value);
+    int writeByte(byte value);
 
-    public void writeBytes(byte[] source, int offset, int length);
+    int writeBytes(byte[] value);
 
-    void writeBoolean(boolean value);
+    int writeBytes(byte[] source, int offset, int length);
 
-    /**
+    int insertBytes(byte[] source, int position, int length);
+
+    long insertBufferLength(int position);
+
+    int writeBoolean(boolean value);
+
+    /*
      *
      * Whole numbers
      *
      */
 
-    void writeShort(short value);
+    int writeShort(short value);
 
-    void writeInt(int value);
+    int writeInt(int value);
 
-    void writeLong(long value);
+    int writeLong(long value);
+
+    /*
+     *
+     * Variable length numbers
+     *
+     */
+
+    int writeSignedVarInt(int value);
+
+    int writeUnsignedVarInt(int value);
+
+    int writeSignedVarLong(long value);
+
+    int writeUnsignedVarLong(long value);
 
     /**
      *
@@ -32,17 +50,17 @@ public interface OutputBuffer {
      *
      */
 
-    void writeDouble(double value);
+    int writeDouble(double value);
 
-    void writeFloat(float value);
+    int writeFloat(float value);
 
-    /**
+    /*
      *
      * Text
      *
      */
 
-    void writeChar(char value);
+    int writeChar(char value);
 
-    void writeString(String value);
+    int writeString(String value);
 }

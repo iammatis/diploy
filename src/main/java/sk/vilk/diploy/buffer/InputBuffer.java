@@ -12,6 +12,14 @@ public interface InputBuffer {
 
     long readLong();
 
+    int readSignedVarInt();
+
+    int readUnsignedVarInt();
+
+    long readSignedVarLong();
+
+    long readUnsignedVarLong();
+
     double readDouble();
 
     float readFloat();

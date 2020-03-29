@@ -5,8 +5,8 @@ import sk.vilk.diploy.buffer.OutputBuffer;
 
 public class FloatSerializer implements Serializer<Float> {
     @Override
-    public void serialize(OutputBuffer out, Float value) {
-        out.writeFloat(value);
+    public int serialize(OutputBuffer out, Float value) {
+        return out.writeFloat(value);
     }
 
     @Override
@@ -15,7 +15,7 @@ public class FloatSerializer implements Serializer<Float> {
     }
 
     @Override
-    public Class type() {
+    public Class<Float> type() {
         return Float.class;
     }
 

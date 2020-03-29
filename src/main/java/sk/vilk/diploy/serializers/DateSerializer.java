@@ -7,17 +7,17 @@ import java.util.Date;
 
 public class DateSerializer implements Serializer<Date> {
     @Override
-    public void serialize(OutputBuffer out, Date value) {
-        out.writeLong(value.getTime());
+    public int serialize(OutputBuffer out, Date value) {
+        return out.writeUnsignedVarLong(value.getTime());
     }
 
     @Override
     public Date deserialize(InputBuffer in) {
-        return new Date(in.readLong());
+        return new Date(in.readUnsignedVarLong());
     }
 
     @Override
-    public Class type() {
+    public Class<Date> type() {
         return Date.class;
     }
 }
