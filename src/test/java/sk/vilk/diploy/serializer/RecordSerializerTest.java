@@ -14,6 +14,7 @@ import sk.vilk.diploy.record.SerialType;
 import sk.vilk.diploy.serializers.RecordSerializer;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -54,20 +55,41 @@ public class RecordSerializerTest {
     }
 
     @Test
-    public void entitySerializationTest() throws IllegalAccessException, NoSuchMethodException, InstantiationException, InvocationTargetException {
+    public void singleEntityTest() throws IllegalAccessException, NoSuchMethodException, InstantiationException, InvocationTargetException {
         SimpleEntity entity = new SimpleEntity(UUID.randomUUID(), "attribute 1", 1);
         Record record = Record.fromEntity(entity);
 
-        System.out.println(record);
-
         serializer.serialize(outputBuffer, record);
-
-        System.out.println(Arrays.toString(outputBuffer.getBytes()));
 
         InputBuffer inputBuffer = new InputByteBuffer(outputBuffer.getBytes());
         Record deserialized = serializer.deserialize(inputBuffer);
         SimpleEntity newEntity = (SimpleEntity) Record.toEntity(deserialized, SimpleEntity.class);
 
         Assert.assertEquals(entity, newEntity);
+    }
+
+    @Test
+    public void multipleEntitiesTest() throws IllegalAccessException, NoSuchMethodException, InstantiationException, InvocationTargetException {
+        List<SimpleEntity> list = List.of(
+                new SimpleEntity(UUID.randomUUID(), "attribute 1", 1),
+                new SimpleEntity(UUID.randomUUID(), "attribute 2", 2),
+                new SimpleEntity(UUID.randomUUID(), "attribute 3", 3)
+        );
+
+        for (SimpleEntity entity: list) {
+            Record record = Record.fromEntity(entity);
+            serializer.serialize(outputBuffer, record);
+        }
+
+        InputBuffer inputBuffer = new InputByteBuffer(outputBuffer.getBytes());
+
+        List<SimpleEntity> deserialized = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            Record des = serializer.deserialize(inputBuffer);
+            SimpleEntity newEntity = (SimpleEntity) Record.toEntity(des, SimpleEntity.class);
+            deserialized.add(newEntity);
+        }
+
+        Assert.assertEquals(list, deserialized);
     }
 }

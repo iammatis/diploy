@@ -30,9 +30,10 @@ public class OutputByteBuffer implements OutputBuffer {
     }
 
     private void resize(int size) {
-        // TODO: Calculate new size
-        size = 0;
-        bytes = Arrays.copyOf(bytes, size);
+        int newSize = size * 2;
+        this.size = newSize;
+        sizeMask = 0xFFFFFFFF - (newSize - 1);
+        bytes = Arrays.copyOf(bytes, newSize);
     }
 
     @Override

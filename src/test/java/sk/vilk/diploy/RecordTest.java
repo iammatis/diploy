@@ -18,7 +18,7 @@ public class RecordTest {
     }
 
     @Test
-    public void serializeAndDeserializeTest() throws IllegalAccessException, NoSuchMethodException, InstantiationException, InvocationTargetException {
+    public void singleEntityTestTest() throws IllegalAccessException, NoSuchMethodException, InstantiationException, InvocationTargetException {
         Record record = Record.fromEntity(simpleEntity);
 
         SimpleEntity newEntity = (SimpleEntity) Record.toEntity(record, SimpleEntity.class);
