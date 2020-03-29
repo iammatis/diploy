@@ -12,7 +12,7 @@ import java.util.UUID;
 public class Record {
     private UUID id;
     // "Pointer" to next entity in file
-    private long next;
+    private int next;
     private Header header;
     // TODO: LockMode?
     private List<Attribute<?>> values;
@@ -29,11 +29,11 @@ public class Record {
         this.id = id;
     }
 
-    public long getNext() {
+    public int getNext() {
         return next;
     }
 
-    public void setNext(long next) {
+    public void setNext(int next) {
         this.next = next;
     }
 

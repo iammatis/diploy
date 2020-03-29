@@ -6,7 +6,7 @@ public class Header {
     /**
      * Attribute count
      */
-    private Integer size;
+    private int size;
     private List<SerialType> serialTypes;
 
     private static HashMap<Class<?>, SerialType> SERIALTYPE_FOR_CLASS = new HashMap<>();
@@ -28,11 +28,11 @@ public class Header {
         this.serialTypes = serialTypes;
     }
 
-    public Integer getSize() {
+    public int getSize() {
         return size;
     }
 
-    public void setSize(Integer size) {
+    public void setSize(int size) {
         this.size = size;
     }
 
@@ -87,7 +87,7 @@ public class Header {
     @Override
     public boolean equals(Object otherHeader) {
         return otherHeader.getClass() == Header.class &&
-                this.size.equals(((Header) otherHeader).size) &&
+                this.size == (((Header) otherHeader).size) &&
                 this.serialTypes.equals(((Header) otherHeader).serialTypes);
     }
 }

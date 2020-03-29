@@ -12,32 +12,32 @@ import java.util.UUID;
 
 public class RecordSerializer implements Serializer<Record> {
 
+    private static final HeaderSerializer headerSerializer = new HeaderSerializer();
+    private static final UUIDSerializer uuidSerializer = new UUIDSerializer();
+
     @Override
     public int serialize(OutputBuffer out, Record record) {
         int written = 0;
+
         UUID uuid = record.getId();
-        UUIDSerializer uuidSerializer = new UUIDSerializer();
         written += uuidSerializer.serialize(out, uuid);
-        int position = out.skip(8);
-        written += 8;
+
+        int position = out.skip(4);
+        written += 4;
 
         Header header = record.getHeader();
-        written += out.writeSignedVarInt(header.getSize());
-
-        for (SerialType serialType: header.getSerialTypes()) {
-            written += out.writeUnsignedVarInt(serialType.getSerialValue());
-        }
+        written += headerSerializer.serialize(out, header);
 
         for (Attribute<?> attribute: record.getValues()) {
             Serializer serializer = SerializerForClass.get(attribute.getClazz());
             written += serializer.serialize(out, attribute.getValue());
         }
 
-        OutputByteBuffer out2 = new OutputByteBuffer(9);
-        out2.writeLong(written);
+        OutputByteBuffer out2 = new OutputByteBuffer(5);
+        out2.writeInt(written);
         record.setNext(written);
 
-        out.insertBytes(out2.toBytes(), position, 8);
+        out.insertBytes(out2.toBytes(), position, 4);
 
         return written;
     }
@@ -45,19 +45,12 @@ public class RecordSerializer implements Serializer<Record> {
     @Override
     public Record deserialize(InputBuffer in) {
         Record record = new Record();
-        UUIDSerializer uuidSerializer = new UUIDSerializer();
         record.setId(uuidSerializer.deserialize(in));
 
-        long next = in.readLong();
+        int next = in.readInt();
         record.setNext(next);
 
-        int attributeCount = in.readSignedVarInt();
-        Header header = new Header(attributeCount);
-        for (int i = 0; i < attributeCount; i++) {
-            int value = in.readUnsignedVarInt();
-            header.addSerialType(value);
-        }
-
+        Header header = headerSerializer.deserialize(in);
         record.setHeader(header);
 
         for (SerialType serialType: header.getSerialTypes()) {
@@ -72,10 +65,5 @@ public class RecordSerializer implements Serializer<Record> {
     @Override
     public Class<Record> type() {
         return Record.class;
-    }
-
-    @Override
-    public int size() {
-        return 0;
     }
 }
