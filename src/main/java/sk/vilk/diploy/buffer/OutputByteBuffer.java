@@ -30,8 +30,7 @@ public class OutputByteBuffer implements OutputBuffer {
     }
 
     private void resize(int size) {
-        int newSize = size * 2;
-        this.length = newSize;
+        int newSize =  Math.max(nextPowTwo(size), length);
         sizeMask = 0xFFFFFFFF - (newSize - 1);
         bytes = Arrays.copyOf(bytes, newSize);
     }
@@ -249,5 +248,9 @@ public class OutputByteBuffer implements OutputBuffer {
         byte[] newBytes = new byte[newLength];
         System.arraycopy(bytes, start, newBytes, 0, newLength);
         return newBytes;
+    }
+
+    private int nextPowTwo(final int a) {
+        return 1 << (32 - Integer.numberOfLeadingZeros(a - 1));
     }
 }

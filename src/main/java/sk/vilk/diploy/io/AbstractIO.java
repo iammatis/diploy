@@ -16,4 +16,8 @@ public class AbstractIO {
         File file = new File(filename);
         dbSize = file.length();
     }
+
+    protected void updateSize(long size) {
+        dbSize += size;
+    }
 }

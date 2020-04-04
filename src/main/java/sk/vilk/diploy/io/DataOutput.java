@@ -14,29 +14,36 @@ public class DataOutput extends AbstractIO implements Output {
 
     @Override
     public void writeRecord(Record record) {
+        OutputByteBuffer buffer = new OutputByteBuffer();
+        serializer.serialize(buffer, record);
+        writeBytes(buffer.toBytes());
+    }
+
+    @Override
+    public void writeRecords(List<Record> records) {
+        OutputByteBuffer buffer = new OutputByteBuffer();
+        for (Record record: records) {
+            serializer.serialize(buffer, record);
+        }
+
+        byte[] bytes  = buffer.toBytes();
+
+        writeBytes(bytes);
+    }
+
+    public void writeBytes(byte[] bytes) {
         try (
                 FileOutputStream fos = new FileOutputStream(filename, true);
                 BufferedOutputStream bos = new BufferedOutputStream(fos)
-                ){
-
-            OutputByteBuffer buffer = new OutputByteBuffer();
-            serializer.serialize(buffer, record);
-            byte[] bytes = buffer.toBytes();
+        ){
             bos.write(bytes);
+
+            updateSize(bytes.length);
 
         } catch (FileNotFoundException e) {
             logger.error("Database file: " + filename + " was not found!", e);
         } catch (IOException e) {
             logger.error("An error occurred trying to save to database file " + filename, e);
         }
-    }
-
-    @Override
-    public void writeRecords(List<Record> records) {
-
-    }
-
-    public void writeBytes(byte[] bytes) {
-
     }
 }

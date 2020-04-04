@@ -45,7 +45,6 @@ public class DataInput extends AbstractIO implements Input {
                 throw new IOException("Incorrect data when reading next");
             }
 
-            System.out.println(Arrays.toString(sizeBytes));
             InputByteBuffer buffer = new InputByteBuffer(sizeBytes);
             int size = buffer.readInt();
             System.out.println("size: " + size);
@@ -101,7 +100,7 @@ public class DataInput extends AbstractIO implements Input {
                     throw new IOException("Error reading record size from file " + filename);
                 }
 
-                int size = ((sizeB[0] << 24) + (sizeB[1] << 16) + (sizeB[2] << 8) + (sizeB[3]));
+                int size = toInt(sizeB);
                 if (Arrays.equals(uuid, uuidBytes)) {
                     // read rest of record and return
                     byte[] recordB = new byte[size];
@@ -125,6 +124,10 @@ public class DataInput extends AbstractIO implements Input {
         }
 
         return null;
+    }
+
+    private int toInt(byte[] bytes) {
+        return ((bytes[0] << 24) + ((bytes[1] & 0xff) << 16) + ((bytes[2] & 0xff) << 8) + (bytes[3] & 0xff));
     }
 }
 
