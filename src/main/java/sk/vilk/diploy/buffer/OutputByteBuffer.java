@@ -7,7 +7,7 @@ public class OutputByteBuffer implements OutputBuffer {
     private int position;
     private byte[] bytes;
     private int sizeMask;
-    private int size;
+    private int length;
     private static final int DEFAULT_SIZE = 128;
 
     public OutputByteBuffer() {
@@ -16,13 +16,13 @@ public class OutputByteBuffer implements OutputBuffer {
 
     public OutputByteBuffer(int size) {
         this.position = 0;
-        this.size = 0;
+        this.length = 0;
         this.bytes = new byte[size];
         this.sizeMask = 0xFFFFFFFF - (size - 1);
     }
 
     private void checkSize(int numOfBytes) {
-        size += numOfBytes;
+        length += numOfBytes;
         numOfBytes += position;
         if ((numOfBytes & sizeMask) != 0) {
             resize(numOfBytes);
@@ -31,7 +31,7 @@ public class OutputByteBuffer implements OutputBuffer {
 
     private void resize(int size) {
         int newSize = size * 2;
-        this.size = newSize;
+        this.length = newSize;
         sizeMask = 0xFFFFFFFF - (newSize - 1);
         bytes = Arrays.copyOf(bytes, newSize);
     }
@@ -175,12 +175,12 @@ public class OutputByteBuffer implements OutputBuffer {
 
     @Override
     public int writeString(String value) {
-        int size = this.size;
+        int size = this.length;
         int length = value.length();
         writeUnsignedVarInt(length);
         writeBytes(value.getBytes());
 
-        return this.size - size;
+        return this.length - size;
     }
 
 
@@ -195,14 +195,14 @@ public class OutputByteBuffer implements OutputBuffer {
     }
 
     public int writeUnsignedVarInt(int value) {
-        int size = this.size;
+        int size = this.length;
         while ((value & 0xFFFFFF80) != 0L) {
             writeByte((value & 0x7F) | 0x80);
             value >>>= 7;
         }
         writeByte(value & 0x7F);
 
-        return this.size - size;
+        return this.length - size;
     }
 
     public int writeSignedVarLong(long value)  {
@@ -210,14 +210,14 @@ public class OutputByteBuffer implements OutputBuffer {
     }
 
     public int writeUnsignedVarLong(long value) {
-        int size = this.size;
+        int size = this.length;
         while ((value & 0xFFFFFFFFFFFFFF80L) != 0L) {
             writeByte(((int) value & 0x7F) | 0x80);
             value >>>= 7;
         }
         writeByte((int) value & 0x7F);
 
-        return this.size - size;
+        return this.length - size;
     }
 
     /**

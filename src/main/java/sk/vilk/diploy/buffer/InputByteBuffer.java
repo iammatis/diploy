@@ -15,6 +15,11 @@ public class InputByteBuffer implements InputBuffer {
         this.bytes = bytes;
     }
 
+    public void reset(byte[] newBytes) {
+        this.position = 0;
+        this.bytes = newBytes;
+    }
+
     @Override
     public byte readByte() {
         return bytes[position++];

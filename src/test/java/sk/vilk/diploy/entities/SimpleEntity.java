@@ -30,4 +30,28 @@ public class SimpleEntity {
                 this.attribute1.equals(((SimpleEntity) obj).attribute1) &&
                 this.attribute2.equals(((SimpleEntity) obj).attribute2);
     }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getAttribute1() {
+        return attribute1;
+    }
+
+    public void setAttribute1(String attribute1) {
+        this.attribute1 = attribute1;
+    }
+
+    public Integer getAttribute2() {
+        return attribute2;
+    }
+
+    public void setAttribute2(Integer attribute2) {
+        this.attribute2 = attribute2;
+    }
 }
