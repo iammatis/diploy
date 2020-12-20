@@ -2,41 +2,87 @@ package sk.vilk.example;
 
 import org.apache.commons.lang3.SerializationUtils;
 import sk.vilk.diploy.EntityManagerFactoryImpl;
+import sk.vilk.diploy.buffer.InputBuffer;
+import sk.vilk.diploy.buffer.InputByteBuffer;
+import sk.vilk.diploy.buffer.OutputBuffer;
+import sk.vilk.diploy.buffer.OutputByteBuffer;
 import sk.vilk.diploy.file.FileManager;
+import sk.vilk.diploy.record.Attribute;
+import sk.vilk.diploy.record.EntityTransform;
+import sk.vilk.diploy.record.Record;
+import sk.vilk.diploy.serializers.Serializer;
+import sk.vilk.diploy.serializers.SerializerForClass;
 
 import javax.persistence.EntityManager;
 import javax.persistence.RollbackException;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IllegalAccessException, NoSuchMethodException, InstantiationException, InvocationTargetException {
 
-        EntityManagerFactoryImpl factory = new EntityManagerFactoryImpl();
-        EntityManager entityManager = factory.createEntityManager();
+        Subject math = new Subject("Math");
+        math.setId(UUID.randomUUID());
+        Record record = EntityTransform.fromEntity(math);
 
-        Teacher foundTeacher = entityManager.find(Teacher.class, "5c07c418-410e-41ef-bc4f-5cb4a2ed1961");
-        System.out.println(foundTeacher);
-        List<Subject> subjects = foundTeacher.getSubjects();
-        Subject subject = subjects.get(0);
-        System.out.println(subject.getId());
-        System.out.println(subject.getName());
-        System.out.println(subject.getTeachers());
-//        Class clazz = foundTeacher.getClazz();
-//        System.out.println(clazz.getStudents());
-//        List<Student> students = clazz.getStudents();
-//        Student student = students.get(0);
-//        System.out.println(student);
-//        System.out.println(student.getClazz());
-//        Subject subject = foundTeacher.getSubjects().get(0);
-//        System.out.println(subject.getTeachers());
-//        foundTeacher.setFirstName("new Jane");
-//        System.out.println(entityManager.getLockMode(foundTeacher));
+        System.out.println(record);
+
+        Subject deformed = (Subject) EntityTransform.toEntity(record, Subject.class);
+
+        System.out.println(math);
+        System.out.println(deformed);
+
+//        Record record = new Record();
+//
+//        Double dub = 1234567.890;
+//        Attribute attr1 = new Attribute(dub);
+////        String str = "1";
+////        Attribute attr2 = new Attribute(str);
+//
+//        List<Attribute> attrs = List.of(attr1);
+//
+//        record.setValues(attrs);
+//
+//        OutputByteBuffer byteBuffer = new OutputByteBuffer();
+//
+//        for (Attribute<?> attribute: record.getValues()) {
+//            Serializer serializer = SerializerForClass.get(attribute.getClazz());
+////            System.out.println(serializer.getClass());
+//            serializer.serialize(byteBuffer, attribute.getValue());
+//        }
+//
+//        System.out.println(Arrays.toString(byteBuffer.getBytes()));
+//
+//        InputBuffer inputBuffer = new InputByteBuffer(byteBuffer.getBytes());
+//        System.out.println("long: " + inputBuffer.readDouble());
+
+//        EntityManagerFactoryImpl factory = new EntityManagerFactoryImpl();
+//        EntityManager entityManager = factory.createEntityManager();
+//
+//        Teacher foundTeacher = entityManager.find(Teacher.class, "dbade35d-92e3-4048-b676-e2cf143a2e63");
 //        System.out.println(foundTeacher);
-        entityManager.close();
-        factory.close();
+//        List<Subject> subjects = foundTeacher.getSubjects();
+//        Subject subject = subjects.get(0);
+//        System.out.println(subject.getId());
+//        System.out.println(subject.getName());
+//        System.out.println(subject.getTeachers());
+////        Class clazz = foundTeacher.getClazz();
+////        System.out.println(clazz.getStudents());
+////        List<Student> students = clazz.getStudents();
+////        Student student = students.get(0);
+////        System.out.println(student);
+////        System.out.println(student.getClazz());
+////        Subject subject = foundTeacher.getSubjects().get(0);
+////        System.out.println(subject.getTeachers());
+////        foundTeacher.setFirstName("new Jane");
+////        System.out.println(entityManager.getLockMode(foundTeacher));
+////        System.out.println(foundTeacher);
+//        entityManager.close();
+//        factory.close();
 //
 //        Subject math = new Subject("Math");
 //        Subject english= new Subject("English");

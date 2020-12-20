@@ -12,7 +12,7 @@ public class EntityEncoder {
     public static void encode(Object entity) {
         Properties properties = ClassScanner.getProperties(entity);
         Integer byteSize = calculateTotalByteSize(entity);
-        EntityBuffer entityBuffer = new EntityBuffer();
+        EntityBuffer entityBuffer = new EntityBuffer(byteSize);
 //        List<ByteBuffer> bytes = new ArrayList<>();
 
         // TODO: Class Flag
@@ -44,6 +44,10 @@ public class EntityEncoder {
         // TODO: Entity end flag ?
 
         Class entityClass = entity.getClass();
+    }
+
+    public static Integer calculateTotalByteSize(Object entity) {
+        return 1;
     }
 
 }

@@ -10,6 +10,7 @@ public class Header {
     private List<SerialType> serialTypes;
 
     private static HashMap<Class<?>, SerialType> SERIALTYPE_FOR_CLASS = new HashMap<>();
+    private static HashMap<Integer, SerialType> SERIALTYPE_FOR_VALUE = new HashMap<>();
 
     static {
         SERIALTYPE_FOR_CLASS.put(Short.class, SerialType.SHORT);
@@ -17,6 +18,22 @@ public class Header {
         SERIALTYPE_FOR_CLASS.put(Long.class, SerialType.LONG);
 
         SERIALTYPE_FOR_CLASS.put(String.class, SerialType.STRING);
+
+
+
+        SERIALTYPE_FOR_VALUE.put(1, SerialType.SHORT);
+        SERIALTYPE_FOR_VALUE.put(2, SerialType.INTEGER);
+        SERIALTYPE_FOR_VALUE.put(3, SerialType.LONG);
+        SERIALTYPE_FOR_VALUE.put(4, SerialType.DOUBLE);
+        SERIALTYPE_FOR_VALUE.put(5, SerialType.FLOAT);
+
+        SERIALTYPE_FOR_VALUE.put(6, SerialType.BOOLEAN);
+
+        SERIALTYPE_FOR_VALUE.put(7, SerialType.CHARACTER);
+        SERIALTYPE_FOR_VALUE.put(8, SerialType.STRING);
+
+        SERIALTYPE_FOR_VALUE.put(9, SerialType.DATE);
+        SERIALTYPE_FOR_VALUE.put(10, SerialType.UUID);
     }
 
     public Header(Integer size) {
@@ -53,27 +70,7 @@ public class Header {
     }
 
     public void addSerialType(int value) {
-        if (value == 1) {
-            serialTypes.add(SerialType.SHORT);
-        } else if (value == 2) {
-            serialTypes.add(SerialType.INTEGER);
-        } else if (value == 3) {
-            serialTypes.add(SerialType.LONG);
-        } else if (value == 4) {
-            serialTypes.add(SerialType.DOUBLE);
-        } else if (value == 5) {
-            serialTypes.add(SerialType.FLOAT);
-        } else if (value == 6) {
-            serialTypes.add(SerialType.BOOLEAN);
-        } else if (value == 7) {
-            serialTypes.add(SerialType.CHARACTER);
-        } else if (value == 8) {
-            serialTypes.add(SerialType.STRING);
-        } else if (value == 9) {
-            serialTypes.add(SerialType.DATE);
-        } else if (value == 10) {
-            serialTypes.add(SerialType.UUID);
-        }
+        serialTypes.add(SERIALTYPE_FOR_VALUE.get(value));
     }
 
     @Override

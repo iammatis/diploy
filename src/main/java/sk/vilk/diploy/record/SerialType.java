@@ -1,5 +1,8 @@
 package sk.vilk.diploy.record;
 
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import java.util.Date;
 import java.util.UUID;
 
@@ -16,7 +19,11 @@ public enum SerialType {
     STRING(String.class, 8),
     DATE(Date.class, 9),
 
-    UUID(UUID.class, 10);
+    UUID(UUID.class, 10),
+
+    ONE_TO_ONE(OneToOne.class, 11),
+    ONE_TO_MANY(OneToMany.class, 12),
+    MAN__TO_ONE(ManyToOne.class, 13);
 
     private Class<?> clazz;
     private int serialValue;

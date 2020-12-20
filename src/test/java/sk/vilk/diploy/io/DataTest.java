@@ -4,6 +4,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import sk.vilk.diploy.entities.SimpleEntity;
+import sk.vilk.diploy.record.EntityTransform;
 import sk.vilk.diploy.record.Record;
 
 import java.io.File;
@@ -34,9 +35,9 @@ public class DataTest {
         SimpleEntity chosen = new SimpleEntity(UUID.randomUUID(), "attribute chosen", 1);
 
         List<Record> list = List.of(
-                Record.fromEntity(new SimpleEntity(UUID.randomUUID(), "attribute", 1)),
-                Record.fromEntity(chosen),
-                Record.fromEntity(new SimpleEntity(UUID.randomUUID(), "attribute", 1))
+                EntityTransform.fromEntity(new SimpleEntity(UUID.randomUUID(), "attribute", 1)),
+                EntityTransform.fromEntity(chosen),
+                EntityTransform.fromEntity(new SimpleEntity(UUID.randomUUID(), "attribute", 1))
         );
 
         for (Record record: list) {
@@ -44,7 +45,7 @@ public class DataTest {
         }
 
         Record foundRecord = input.findRecord(chosen.getId());
-        SimpleEntity found = (SimpleEntity) Record.toEntity(foundRecord, SimpleEntity.class);
+        SimpleEntity found = (SimpleEntity) EntityTransform.toEntity(foundRecord, SimpleEntity.class);
 
         Assert.assertEquals(chosen, found);
     }
@@ -57,17 +58,17 @@ public class DataTest {
 
         List<Record> list = new ArrayList<>();
         for (int i = 0; i < NUMBER; i++) {
-            list.add(Record.fromEntity(new SimpleEntity(UUID.randomUUID(), "attribute", 1)));
+            list.add(EntityTransform.fromEntity(new SimpleEntity(UUID.randomUUID(), "attribute", 1)));
         }
 
-        list.add(Record.fromEntity(chosen));
+        list.add(EntityTransform.fromEntity(chosen));
 
         for (Record record: list) {
             output.writeRecord(record);
         }
 
         Record foundRecord = input.findRecord(chosen.getId());
-        SimpleEntity found = (SimpleEntity) Record.toEntity(foundRecord, SimpleEntity.class);
+        SimpleEntity found = (SimpleEntity) EntityTransform.toEntity(foundRecord, SimpleEntity.class);
 
         Assert.assertEquals(chosen, found);
     }
@@ -80,15 +81,15 @@ public class DataTest {
 
         List<Record> list = new ArrayList<>();
         for (int i = 0; i < NUMBER; i++) {
-            list.add(Record.fromEntity(new SimpleEntity(UUID.randomUUID(), "attribute", 1)));
+            list.add(EntityTransform.fromEntity(new SimpleEntity(UUID.randomUUID(), "attribute", 1)));
         }
 
-        list.add(Record.fromEntity(chosen));
+        list.add(EntityTransform.fromEntity(chosen));
 
         output.writeRecords(list);
 
         Record foundRecord = input.findRecord(chosen.getId());
-        SimpleEntity found = (SimpleEntity) Record.toEntity(foundRecord, SimpleEntity.class);
+        SimpleEntity found = (SimpleEntity) EntityTransform.toEntity(foundRecord, SimpleEntity.class);
 
         Assert.assertEquals(chosen, found);
     }

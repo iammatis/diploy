@@ -84,6 +84,25 @@ public class ClassScanner {
 
         if (bytes != null) {
             classes = MetaDecoder.decode(bytes);
+            for (Properties properties: classes.values()) {
+                Field idField = properties.getIdField();
+                List<Column> plainObjects = properties.getPlainObjects();
+                List<RelationalColumn> relations = properties.getRelations();
+                System.out.println("idField");
+                System.out.println(idField.getName());
+                System.out.println();
+                System.out.println("plainObjects");
+                for (Column plainObject: plainObjects) {
+                    System.out.println("plainObject");
+                    System.out.println(plainObject.toString());
+                }
+                System.out.println();
+                System.out.println("relations");
+                for (RelationalColumn relation: relations) {
+                    System.out.println("relation");
+                    System.out.println(relation.toString());
+                }
+            }
         }
     }
 }

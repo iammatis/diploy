@@ -89,7 +89,7 @@ public class MetaEncoder implements MetaConstants {
                    it is also doubled because there is relation type before every relation name
                  */
                 1 + relationsByteSize + properties.getRelations().size() * 3 +
-                /* Last byte containing end of entity flag 128 */
+                /* Last byte containing end of entity flag 127 */
                 1;
     }
 }

@@ -26,9 +26,7 @@ public class DataOutput extends AbstractIO implements Output {
             serializer.serialize(buffer, record);
         }
 
-        byte[] bytes  = buffer.toBytes();
-
-        writeBytes(bytes);
+        writeBytes(buffer.toBytes());
     }
 
     public void writeBytes(byte[] bytes) {

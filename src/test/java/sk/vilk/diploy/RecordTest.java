@@ -4,6 +4,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import sk.vilk.diploy.entities.SimpleEntity;
+import sk.vilk.diploy.record.EntityTransform;
 import sk.vilk.diploy.record.Record;
 
 import java.lang.reflect.InvocationTargetException;
@@ -19,9 +20,9 @@ public class RecordTest {
 
     @Test
     public void singleEntityTestTest() throws IllegalAccessException, NoSuchMethodException, InstantiationException, InvocationTargetException {
-        Record record = Record.fromEntity(simpleEntity);
+        Record record = EntityTransform.fromEntity(simpleEntity);
 
-        SimpleEntity newEntity = (SimpleEntity) Record.toEntity(record, SimpleEntity.class);
+        SimpleEntity newEntity = (SimpleEntity) EntityTransform.toEntity(record, SimpleEntity.class);
         Assert.assertEquals(simpleEntity, newEntity);
     }
 }

@@ -9,6 +9,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class MetaDecoder implements MetaConstants {
@@ -20,7 +21,10 @@ public class MetaDecoder implements MetaConstants {
         while (byteBuffer.hasRemaining()) {
             Properties properties = new Properties();
 
+            System.out.println("bytes");
+            System.out.println(Arrays.toString(byteBuffer.array()));
             Class<?> decodedClass = decodedClass(byteBuffer);
+            System.out.println("got class " + decodedClass.getSimpleName());
             properties.setEntityClass(decodedClass);
 
             Field decodedIdField = decodeField(byteBuffer, decodedClass);
@@ -52,6 +56,8 @@ public class MetaDecoder implements MetaConstants {
         byte size = byteBuffer.get();
         byte[] bytes = new byte[size];
         byteBuffer.get(bytes, 0, size);
+
+        System.out.println("size: " + size);
 
         return new String(bytes);
     }
